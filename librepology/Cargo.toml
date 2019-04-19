@@ -1,0 +1,17 @@
+[package]
+name = "librepology"
+version = "0.1.0"
+authors = ["Matthias Beyer <matthias.beyer@atos.net>"]
+edition = "2018"
+
+[dependencies]
+serde = "1"
+serde_derive = "1"
+serde_json = "1"
+url = "1.7"
+url_serde = "0.2"
+futures = "*"
+failure = "0.1"
+log = "0.4"
+derive_more = "0.14"
+curl = "0.4"
