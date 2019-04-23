@@ -1,0 +1,20 @@
+language: rust
+sudo: false
+
+rust:
+  - 1.32.0
+  - 1.33.0
+  - stable
+  - beta
+  - nightly
+
+matrix:
+  allow_failures:
+    - rust: nightly
+
+cache: cargo
+
+script:
+  - cargo build --all-features --verbose -j 1
+  - cargo test  --all-features --verbose -j 1
+
