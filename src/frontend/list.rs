@@ -23,15 +23,15 @@ impl Frontend for ListFrontend {
 
         packages.iter().fold(Ok(()), |accu, package| {
             accu.and_then(|_| {
-                let status = if let Some(stat) = package.status() {
-                    format!("{}", stat)
+                let status= if let Some(stat) = package.status() {
+                    stat.deref().to_string()
                 } else {
                     String::from("No status")
                 }; // not optimal, but works for now.
 
-                let url = if let Some(url) = package.www() {
+                let url= if let Some(url) = package.www() {
                     if let Some(url) = url.first() {
-                        format!("{}", url.deref())
+                        url.deref().to_string()
                     } else {
                         String::from("")
                     }
