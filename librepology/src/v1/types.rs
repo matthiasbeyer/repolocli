@@ -71,7 +71,7 @@ impl Package {
 
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Problem {
     #[serde(rename = "repo")]
     repo: Repo,
@@ -112,7 +112,7 @@ impl Problem {
 }
 
 // name of repository for this package
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Repo(String);
 
 impl Deref for Repo {
@@ -124,7 +124,7 @@ impl Deref for Repo {
 }
 
 // package name as in repository (if different from version)
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Name(String);
 
 impl Deref for Name {
@@ -136,7 +136,7 @@ impl Deref for Name {
 }
 
 // package version (sanitized)
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Version(String);
 
 impl Deref for Version {
@@ -148,7 +148,7 @@ impl Deref for Version {
 }
 
 // package status
-#[derive(Clone, Debug, Serialize, Deserialize, Display)]
+#[derive(Eq, PartialEq, Clone, Debug, Serialize, Deserialize, Display)]
 pub enum Status {
     #[serde(rename = "newest")]
     #[display(fmt = "newest")]
@@ -192,7 +192,7 @@ pub enum Status {
 }
 
 // one-line description of the package
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Summary(String);
 
 impl Deref for Summary {
@@ -204,7 +204,7 @@ impl Deref for Summary {
 }
 
 // list of package categories
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Category(String);
 
 impl Deref for Category {
@@ -216,7 +216,7 @@ impl Deref for Category {
 }
 
 // list of package licenses
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct License(String);
 
 impl Deref for License {
@@ -228,7 +228,7 @@ impl Deref for License {
 }
 
 // list of package maintainers
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct Maintainer(String);
 
 impl Deref for Maintainer {
@@ -264,7 +264,7 @@ impl Deref for Download {
 }
 
 // list of package downloads
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
 pub struct EffName(String);
 
 impl Deref for EffName {
