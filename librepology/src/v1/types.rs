@@ -2,7 +2,7 @@ use std::ops::Deref;
 
 use url::Url;
 
-#[derive(Eq, PartialEq, PartialOrd, Ord, Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Package {
     /// name of repository for this package
     repo: Repo,
