@@ -41,28 +41,34 @@ impl Frontend for JsonFrontend {
             // but using references is too complicated right now
             package_name: String,
             local_version: String,
-            upstream_repo: String,
-            upstream_version: String,
+            comparisons: Vec<CompareTarget>,
+        }
+
+        #[derive(Serialize)]
+        struct CompareTarget {
+            version: String,
+            repo: String,
         }
 
         let mut output: Vec<PackageComp> = vec![];
 
         for package in packages.iter() {
-            let mut list = backend
+
+            let comparisons = backend
                 .project(package.name().deref())?
                 .into_iter()
                 .filter(|p| filter_repos.contains(p.repo()))
-                .map(|upstream_package| {
-                    PackageComp {
-                        package_name: package.name().clone(),
-                        local_version: package.version().clone(),
-                        upstream_repo: upstream_package.repo().deref().clone(),
-                        upstream_version: upstream_package.version().deref().clone(),
-                    }
+                .map(|upstream_package| CompareTarget {
+                    version: upstream_package.version().deref().clone(),
+                    repo: upstream_package.repo().deref().clone(),
                 })
-                .collect::<Vec<_>>();
+                .collect();
 
-            output.append(&mut list);
+            output.push(PackageComp {
+                package_name: package.name().clone(),
+                local_version: package.version().clone(),
+                comparisons,
+            });
         }
 
         let output = serde_json::ser::to_string_pretty(&output)?;
