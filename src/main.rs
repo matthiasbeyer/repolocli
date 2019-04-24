@@ -21,6 +21,7 @@ mod config;
 mod backend;
 mod frontend;
 mod cli;
+mod compare;
 
 use std::path::PathBuf;
 
@@ -34,9 +35,9 @@ use clap::ArgMatches;
 use filters::filter::Filter;
 
 use config::Configuration;
+use compare::ComparePackage;
 use librepology::v1::api::Api;
 use librepology::v1::types::Repo;
-use librepology::v1::types::Package;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
     let verbosity = app.occurrences_of("verbose");
@@ -65,7 +66,7 @@ fn initialize_logging(app: &ArgMatches) -> Result<()> {
         .map_err(Error::from)
 }
 
-fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<Package>> {
+fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePackage>> {
     let pb = PathBuf::from(filepath);
     let ext = pb
         .extension()
@@ -81,7 +82,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<Package>> {
         #[cfg(feature = "compare_csv")]
         "csv" => {
             let cursor = Cursor::new(s);
-            let mut v : Vec<Package> = vec![];
+            let mut v : Vec<ComparePackage> = vec![];
             for element in csv::Reader::from_reader(cursor).deserialize() {
                 v.push(element?);
             }
@@ -185,7 +186,7 @@ fn main() -> Result<()> {
             let repos = mtch.values_of("compare-distros").unwrap().map(|s| Repo::new(String::from(s))).collect();
             let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
             let content = ::std::fs::read_to_string(file_path).map_err(Error::from)?;
-            let pkgs : Vec<Package> = deserialize_package_list(content, file_path)?;
+            let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
 
             frontend.compare_packages(pkgs, &backend, repos)?;
         },

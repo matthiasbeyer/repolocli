@@ -10,6 +10,7 @@ use prettytable::Table;
 
 use crate::frontend::Frontend;
 use crate::backend::Backend;
+use crate::compare::ComparePackage;
 use librepology::v1::api::Api;
 
 pub struct TableFrontend(Stdout);
@@ -94,7 +95,7 @@ impl Frontend for TableFrontend {
         Ok(())
     }
 
-    fn compare_packages(&self, packages: Vec<Package>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
+    fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
         let mut table = Table::new();
         let format = format::FormatBuilder::new()
             .column_separator('|')

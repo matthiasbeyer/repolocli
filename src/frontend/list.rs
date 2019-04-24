@@ -10,6 +10,7 @@ use failure::Error;
 
 use crate::frontend::Frontend;
 use crate::backend::Backend;
+use crate::compare::ComparePackage;
 use librepology::v1::api::Api;
 
 pub struct ListFrontend(Stdout);
@@ -71,7 +72,7 @@ impl Frontend for ListFrontend {
         })
     }
 
-    fn compare_packages(&self, packages: Vec<Package>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
+    fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
         let mut output = self.0.lock();
 
         for package in packages {

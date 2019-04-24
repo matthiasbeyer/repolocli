@@ -10,6 +10,7 @@ use failure::Error;
 
 use crate::frontend::Frontend;
 use crate::backend::Backend;
+use crate::compare::ComparePackage;
 use librepology::v1::api::Api;
 
 pub struct JsonFrontend(Stdout);
@@ -33,7 +34,7 @@ impl Frontend for JsonFrontend {
         writeln!(outlock, "{}", output).map_err(Error::from)
     }
 
-    fn compare_packages(&self, packages: Vec<Package>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
+    fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
         #[derive(Serialize)]
         struct PackageComp {
             // not optimal, as we have to clone the inner variables from the package
@@ -53,8 +54,8 @@ impl Frontend for JsonFrontend {
                 .filter(|p| filter_repos.contains(p.repo()))
                 .map(|upstream_package| {
                     PackageComp {
-                        package_name: package.name().deref().clone(),
-                        local_version: package.version().deref().clone(),
+                        package_name: package.name().clone(),
+                        local_version: package.version().clone(),
                         upstream_repo: upstream_package.repo().deref().clone(),
                         upstream_version: upstream_package.version().deref().clone(),
                     }
