@@ -9,6 +9,9 @@ extern crate reqwest;
 extern crate tokio;
 extern crate filters;
 
+#[cfg(feature = "compare_csv")]
+extern crate csv;
+
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate log;
 #[macro_use] extern crate failure;
@@ -20,6 +23,10 @@ mod frontend;
 mod cli;
 
 use std::path::PathBuf;
+
+#[cfg(feature = "compare_csv")]
+use std::io::Cursor;
+
 use failure::err_msg;
 use failure::Error;
 use failure::Fallible as Result;
@@ -29,6 +36,7 @@ use filters::filter::Filter;
 use config::Configuration;
 use librepology::v1::api::Api;
 use librepology::v1::types::Repo;
+use librepology::v1::types::Package;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
     let verbosity = app.occurrences_of("verbose");
@@ -55,6 +63,33 @@ fn initialize_logging(app: &ArgMatches) -> Result<()> {
             debug!("Logger initialized!");
         })
         .map_err(Error::from)
+}
+
+fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<Package>> {
+    let pb = PathBuf::from(filepath);
+    let ext = pb
+        .extension()
+        .ok_or_else(|| format_err!("Couldn't get file extension: {}", filepath))?
+        .to_str()
+        .ok_or_else(|| format_err!("Not valid Unicode: {}", filepath))?;
+
+    match ext {
+        "json" => {
+            serde_json::from_str(&s).map_err(Error::from)
+        },
+
+        #[cfg(feature = "compare_csv")]
+        "csv" => {
+            let cursor = Cursor::new(s);
+            let mut v : Vec<Package> = vec![];
+            for element in csv::Reader::from_reader(cursor).deserialize() {
+                v.push(element?);
+            }
+            Ok(v)
+        },
+
+        other => Err(format_err!("Unknown file extension: {}", other))?,
+    }
 }
 
 fn main() -> Result<()> {
@@ -145,7 +180,15 @@ fn main() -> Result<()> {
             .collect();
 
             frontend.list_problems(problems)?;
-        }
+        },
+        ("compare", Some(mtch)) => {
+            let repos = mtch.values_of("compare-distros").unwrap().map(|s| Repo::new(String::from(s))).collect();
+            let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
+            let content = ::std::fs::read_to_string(file_path).map_err(Error::from)?;
+            let pkgs : Vec<Package> = deserialize_package_list(content, file_path)?;
+
+            frontend.compare_packages(pkgs, &backend, repos)?;
+        },
 
         (other, _mtch) => {
             if app.is_present("input_stdin") {
