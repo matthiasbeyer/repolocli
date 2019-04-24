@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 // package name as in repository (if different from version)
-#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize, new)]
 pub struct Name(String);
 
 impl Deref for Name {
