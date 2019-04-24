@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 // package version (sanitized)
-#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize, new)]
 pub struct Version(String);
 
 impl Deref for Version {

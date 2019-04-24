@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 // list of package maintainers
-#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone, Debug, Serialize, Deserialize, new)]
 pub struct Maintainer(String);
 
 impl Deref for Maintainer {
