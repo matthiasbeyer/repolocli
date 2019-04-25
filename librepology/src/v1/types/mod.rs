@@ -1,3 +1,11 @@
+//! Module containing all _types_ of data for the API implementation
+//!
+//! Tne types have no functionality themselves but only represent objects which are returned by the´
+//! repology API.
+//!
+//! This top-level module exports all types of the submodules publicly.
+//!
+
 mod category;
 mod download;
 mod effname;
