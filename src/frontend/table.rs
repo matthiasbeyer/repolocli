@@ -36,6 +36,12 @@ impl TableFrontend {
         table.set_titles(row!["Name", "Version", "Repo", "Status", "URL"]);
         table
     }
+
+    fn print(&self, table: Table) -> Result<()> {
+        let mut outlock = self.0.lock();
+        table.print(&mut outlock)?;
+        Ok(())
+    }
 }
 
 impl Frontend for TableFrontend {
@@ -60,11 +66,7 @@ impl Frontend for TableFrontend {
 
             table.add_row(row![package.name(), package.version(), package.repo(), status, url]);
         });
-
-        let mut outlock = self.0.lock();
-        table.print(&mut outlock)?;
-
-        Ok(())
+        self.print(table)
     }
 
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()> {
@@ -79,11 +81,7 @@ impl Frontend for TableFrontend {
                 problem.problem_description()
             ]);
         });
-
-        let mut outlock = self.0.lock();
-        table.print(&mut outlock)?;
-
-        Ok(())
+        self.print(table)
     }
 
     fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
@@ -102,11 +100,7 @@ impl Frontend for TableFrontend {
                    ]);
                 });
         }
-
-        let mut outlock = self.0.lock();
-        table.print(&mut outlock)?;
-
-        Ok(())
+        self.print(table)
     }
 }
 
