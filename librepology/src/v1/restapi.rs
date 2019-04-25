@@ -41,30 +41,18 @@ impl RestApi {
 impl Api for RestApi {
 
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
-        let request_url = format!("{}api/v1/project/{}", self.repology, name.as_ref());
-
-        self.send_request(request_url)
-            .and_then(|r| {
-                serde_json::from_str(&r).map_err(Error::from)
-            })
+        let url = format!("{}api/v1/project/{}", self.repology, name.as_ref());
+        serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 
     fn problems_for_repo<R: AsRef<str>>(&self, repo: R) -> Result<Vec<Problem>> {
-        let request_url = format!("{}api/v1/repository/{}/problems", self.repology, repo.as_ref());
-
-        self.send_request(request_url)
-            .and_then(|r| {
-                serde_json::from_str(&r).map_err(Error::from)
-            })
+        let url = format!("{}api/v1/repository/{}/problems", self.repology, repo.as_ref());
+        serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 
     fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
-        let request_url = format!("{}api/v1/maintainer/{}/problems", self.repology, maintainer.as_ref());
-
-        self.send_request(request_url)
-            .and_then(|r| {
-                serde_json::from_str(&r).map_err(Error::from)
-            })
+        let url = format!("{}api/v1/maintainer/{}/problems", self.repology, maintainer.as_ref());
+        serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 
 }
