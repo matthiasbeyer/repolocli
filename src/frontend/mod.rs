@@ -10,6 +10,7 @@ use crate::frontend::table::TableFrontend;
 use crate::compare::ComparePackage;
 use crate::backend::Backend;
 
+/// A Frontend represents a way to show the data to the user
 pub trait Frontend {
     fn list_packages(&self, packages: Vec<Package>) -> Result<()>;
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()>;
