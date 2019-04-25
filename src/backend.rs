@@ -15,6 +15,9 @@ pub enum Backend {
     RepologyOrg(RestApi),
 }
 
+/// Implement Api for Backend
+///
+/// With this, we can use the `Backend` object and do not have to care whether we have a librepology::
 impl Api for Backend {
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
         match self {
