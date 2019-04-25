@@ -3,8 +3,8 @@ use failure::Fallible as Result;
 
 use librepology::v1::api::Api;
 use librepology::v1::restapi::RestApi;
+use librepology::v1::stdinapi::StdinWrapper;
 use librepology::v1::types::*;
-use librepology::v1::api::StdinWrapper;
 
 use crate::config::Configuration;
 
@@ -15,6 +15,9 @@ pub enum Backend {
     RepologyOrg(RestApi),
 }
 
+/// Implement Api for Backend
+///
+/// With this, we can use the `Backend` object and do not have to care whether we have a librepology::
 impl Api for Backend {
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
         match self {

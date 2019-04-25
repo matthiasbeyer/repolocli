@@ -15,6 +15,9 @@ use librepology::v1::api::Api;
 
 pub struct ListFrontend(Stdout);
 
+/// A Frontend that prints the data in a human-readable way but without ASCII-art.
+///
+/// It seperates the values with dashes ("-") for a slightly better reading experience.
 impl ListFrontend {
     pub fn new(stdout: Stdout) -> Self {
         ListFrontend(stdout)

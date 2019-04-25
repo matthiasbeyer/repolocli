@@ -10,6 +10,7 @@ use crate::frontend::table::TableFrontend;
 use crate::compare::ComparePackage;
 use crate::backend::Backend;
 
+/// A Frontend represents a way to show the data to the user
 pub trait Frontend {
     fn list_packages(&self, packages: Vec<Package>) -> Result<()>;
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()>;
@@ -20,6 +21,7 @@ pub mod list;
 pub mod json;
 pub mod table;
 
+/// Helper function for building a new Frontend object based on the commandline parameters
 pub fn new_frontend(app: &ArgMatches, _config: &Configuration) -> Result<Box<Frontend>> {
     match app.value_of("output") {
         None | Some("lines") => {
