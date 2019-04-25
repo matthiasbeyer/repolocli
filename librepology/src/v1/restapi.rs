@@ -7,6 +7,7 @@ use curl::easy::Easy2;
 use crate::v1::types::{Package, Problem};
 use crate::v1::api::Api;
 
+/// Private helper type for collecting data from the curl library
 struct Collector(Vec<u8>);
 impl curl::easy::Handler for Collector {
     fn write(&mut self, data: &[u8]) -> RResult<usize, curl::easy::WriteError> {
@@ -15,6 +16,7 @@ impl curl::easy::Handler for Collector {
     }
 }
 
+/// Representational object for the REST Api of repology
 pub struct RestApi {
     /// Base url
     repology: String,
@@ -25,6 +27,7 @@ impl RestApi {
         Self { repology }
     }
 
+    /// Helper function for sending a request via the curl library
     fn send_request<U: AsRef<str>>(&self, request: U) -> Result<String> {
         let mut easy = Easy2::new(Collector(Vec::new()));
         easy.get(true)?;
