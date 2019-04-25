@@ -5,8 +5,6 @@ extern crate toml_query;
 extern crate url;
 extern crate xdg;
 extern crate flexi_logger;
-extern crate reqwest;
-extern crate tokio;
 extern crate filters;
 
 #[cfg(feature = "compare_csv")]
