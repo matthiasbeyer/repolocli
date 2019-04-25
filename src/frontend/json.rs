@@ -15,6 +15,15 @@ use librepology::v1::api::Api;
 
 pub struct JsonFrontend(Stdout);
 
+/// A Frontend that serializes the data to JSON
+///
+/// Useful for piping the data as structured data to another program.
+///
+/// # Warning
+///
+/// This frontend does _not_ maintain compatibility with repolocli itself. That means that piping
+/// output from repolocli to repolocli is _NOT_ supported by this frontend.
+///
 impl JsonFrontend {
     pub fn new(stdout: Stdout) -> Self {
         JsonFrontend(stdout)

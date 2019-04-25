@@ -13,6 +13,7 @@ use crate::backend::Backend;
 use crate::compare::ComparePackage;
 use librepology::v1::api::Api;
 
+/// A Frontend that formats the output in a nice ASCII-art table
 pub struct TableFrontend(Stdout);
 
 impl TableFrontend {
