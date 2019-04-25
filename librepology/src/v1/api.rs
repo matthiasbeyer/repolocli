@@ -26,12 +26,10 @@ pub trait Api {
 }
 
 
-//
-// Api implemented for StdIn (via a Wrapper for interior mutability)
-//
-// This way we can read the data from stdin and process it
-//
-
+/// Wrapper for "stdin"
+///
+/// This way we can implement the `Api` trait for StdIn (via a Wrapper for interior mutability)
+/// This way we can read the data from stdin and process it.
 pub struct StdinWrapper(RefCell<Stdin>);
 
 impl From<Stdin> for StdinWrapper {
