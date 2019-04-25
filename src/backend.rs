@@ -3,8 +3,8 @@ use failure::Fallible as Result;
 
 use librepology::v1::api::Api;
 use librepology::v1::restapi::RestApi;
+use librepology::v1::stdinapi::StdinWrapper;
 use librepology::v1::types::*;
-use librepology::v1::api::StdinWrapper;
 
 use crate::config::Configuration;
 
