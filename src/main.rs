@@ -6,6 +6,7 @@ extern crate url;
 extern crate xdg;
 extern crate flexi_logger;
 extern crate filters;
+extern crate boolinator;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
@@ -28,9 +29,11 @@ use std::io::Cursor;
 
 use failure::err_msg;
 use failure::Error;
+use failure::ResultExt;
 use failure::Fallible as Result;
 use clap::ArgMatches;
 use filters::filter::Filter;
+use boolinator::Boolinator;
 
 use config::Configuration;
 use compare::ComparePackage;
@@ -91,7 +94,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
     }
 }
 
-fn main() -> Result<()> {
+fn app() -> Result<()> {
     let app = cli::build_cli().get_matches();
     initialize_logging(&app)?;
     let config : Configuration = {
@@ -110,7 +113,9 @@ fn main() -> Result<()> {
 
         let buffer = std::fs::read_to_string(path).map_err(Error::from)?;
         trace!("Config read into memory");
-        toml::de::from_str(&buffer).map_err(Error::from)
+        toml::de::from_str(&buffer)
+            .map_err(Error::from)
+            .context("Configuration file parsing")
     }?;
     trace!("Config deserialized");
 
@@ -160,7 +165,7 @@ fn main() -> Result<()> {
                 .into_iter()
                 .filter(|package| repository_filter.filter(package.repo()))
                 .collect();
-            frontend.list_packages(packages)?;
+            frontend.list_packages(packages)
         },
         ("problems", Some(mtch)) => {
             trace!("Handling problems");
@@ -178,35 +183,45 @@ fn main() -> Result<()> {
             .filter(|problem| repository_filter.filter(problem.repo()))
             .collect();
 
-            frontend.list_problems(problems)?;
+            frontend.list_problems(problems)
         },
         ("compare", Some(mtch)) => {
-            let repos = mtch.values_of("compare-distros").unwrap().map(|s| Repo::new(String::from(s))).collect();
+            let repos = mtch.values_of("compare-distros").unwrap().map(String::from).map(Repo::new).collect();
             let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
-            let content = ::std::fs::read_to_string(file_path).map_err(Error::from)?;
+            let content = ::std::fs::read_to_string(file_path)?;
             let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
 
-            frontend.compare_packages(pkgs, &backend, repos)?;
+            frontend.compare_packages(pkgs, &backend, repos)
         },
 
         (other, _mtch) => {
-            if app.is_present("input_stdin") {
-                // Ugly, but works:
-                // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
-                // _any_ "project", and get the stdin anyways. This is really not like it should be, but
-                // works for now
-                let packages = backend
-                    .project("")?
-                    .into_iter()
-                    .filter(|package| repository_filter.filter(package.repo()))
-                    .collect();
-                frontend.list_packages(packages)?;
-            } else {
-                error!("Unknown command: '{}'", other);
-                ::std::process::exit(1)
-            }
+            app.is_present("input_stdin")
+                .as_result((), Error::from(format_err!("Input not from stdin")))
+                .and_then(|_| {
+                    // Ugly, but works:
+                    // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
+                    // _any_ "project", and get the stdin anyways. This is really not like it should be, but
+                    // works for now
+                    let packages = backend
+                        .project("")?
+                        .into_iter()
+                        .filter(|package| repository_filter.filter(package.repo()))
+                        .collect();
+
+                    frontend.list_packages(packages)
+                })
+                .map_err(|_| format_err!("Unknown command: {}", other))
         }
     }
+}
 
-    Ok(())
+fn print_error(e: Error) {
+    error!("Error: {}", e);
+    e.iter_causes().for_each(|cause| {
+        error!("Caused by: {}", cause)
+    });
+}
+
+fn main() {
+    let _ = app().map_err(print_error);
 }
