@@ -7,6 +7,7 @@ extern crate xdg;
 extern crate flexi_logger;
 extern crate filters;
 extern crate boolinator;
+extern crate itertools;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
@@ -34,6 +35,7 @@ use failure::Fallible as Result;
 use clap::ArgMatches;
 use filters::filter::Filter;
 use boolinator::Boolinator;
+use itertools::Itertools;
 
 use config::Configuration;
 use compare::ComparePackage;
@@ -160,11 +162,22 @@ fn app() -> Result<()> {
                 mtch.value_of("project_name").unwrap()  // safe by clap
             };
 
-            let packages = backend
-                .project(&name)?
-                .into_iter()
-                .filter(|package| repository_filter.filter(package.repo()))
-                .collect();
+            let packages = {
+                let iter = backend
+                    .project(&name)?
+                    .into_iter()
+                    .filter(|package| repository_filter.filter(package.repo()));
+
+                if mtch.is_present("sort-versions"){
+                    iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
+                        .collect()
+                } else if mtch.is_present("sort-repo") {
+                    iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
+                        .collect()
+                } else {
+                    iter.collect()
+                }
+            };
             frontend.list_packages(packages)
         },
         ("problems", Some(mtch)) => {
@@ -173,15 +186,26 @@ fn app() -> Result<()> {
             let repo = mtch.value_of("repo");
             let maintainer = mtch.value_of("maintainer");
 
-            let problems = match (repo, maintainer) {
-                (Some(r), None) => backend.problems_for_repo(&r)?,
-                (None, Some(m)) => backend.problems_for_maintainer(&m)?,
-                (None, None) => unimplemented!(),
-                (Some(_), Some(_)) => unimplemented!(),
-            }
-            .into_iter()
-            .filter(|problem| repository_filter.filter(problem.repo()))
-            .collect();
+            let problems = {
+                let iter = match (repo, maintainer) {
+                    (Some(r), None) => backend.problems_for_repo(&r)?,
+                    (None, Some(m)) => backend.problems_for_maintainer(&m)?,
+                    (None, None) => unimplemented!(),
+                    (Some(_), Some(_)) => unimplemented!(),
+                }
+                .into_iter()
+                .filter(|problem| repository_filter.filter(problem.repo()));
+
+                if mtch.is_present("sort-maintainer") {
+                    iter.sorted_by(|a, b| Ord::cmp(a.maintainer(), b.maintainer()))
+                        .collect()
+                } else if mtch.is_present("sort-repo") {
+                    iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
+                        .collect()
+                } else {
+                    iter.collect()
+                }
+            };
 
             frontend.list_problems(problems)
         },
