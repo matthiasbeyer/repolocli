@@ -6,6 +6,7 @@ extern crate url;
 extern crate xdg;
 extern crate flexi_logger;
 extern crate filters;
+extern crate boolinator;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
@@ -32,6 +33,7 @@ use failure::ResultExt;
 use failure::Fallible as Result;
 use clap::ArgMatches;
 use filters::filter::Filter;
+use boolinator::Boolinator;
 
 use config::Configuration;
 use compare::ComparePackage;
@@ -193,21 +195,21 @@ fn app() -> Result<()> {
         },
 
         (other, _mtch) => {
-            if app.is_present("input_stdin") {
-                // Ugly, but works:
-                // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
-                // _any_ "project", and get the stdin anyways. This is really not like it should be, but
-                // works for now
-                let packages = backend
-                    .project("")?
-                    .into_iter()
-                    .filter(|package| repository_filter.filter(package.repo()))
-                    .collect();
-                frontend.list_packages(packages)?;
-            } else {
-                error!("Unknown command: '{}'", other);
-                ::std::process::exit(1)
-            }
+            app.is_present("input_stdin")
+                .as_result((), Error::from(format_err!("Input not from stdin")))
+                .and_then(|_| {
+                    // Ugly, but works:
+                    // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
+                    // _any_ "project", and get the stdin anyways. This is really not like it should be, but
+                    // works for now
+                    let packages = backend
+                        .project("")?
+                        .into_iter()
+                        .filter(|package| repository_filter.filter(package.repo()))
+                        .collect();
+                    frontend.list_packages(packages)
+                })
+                .map_err(|_| format_err!("Unknown command: {}", other))
         }
     }
 
