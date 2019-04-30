@@ -186,7 +186,7 @@ fn app() -> Result<()> {
             frontend.list_problems(problems)?;
         },
         ("compare", Some(mtch)) => {
-            let repos = mtch.values_of("compare-distros").unwrap().map(|s| Repo::new(String::from(s))).collect();
+            let repos = mtch.values_of("compare-distros").unwrap().map(String::from).map(Repo::new).collect();
             let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
             let content = ::std::fs::read_to_string(file_path).map_err(Error::from)?;
             let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
