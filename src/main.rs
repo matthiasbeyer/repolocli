@@ -165,7 +165,7 @@ fn app() -> Result<()> {
                 .into_iter()
                 .filter(|package| repository_filter.filter(package.repo()))
                 .collect();
-            frontend.list_packages(packages)?;
+            frontend.list_packages(packages)
         },
         ("problems", Some(mtch)) => {
             trace!("Handling problems");
@@ -183,7 +183,7 @@ fn app() -> Result<()> {
             .filter(|problem| repository_filter.filter(problem.repo()))
             .collect();
 
-            frontend.list_problems(problems)?;
+            frontend.list_problems(problems)
         },
         ("compare", Some(mtch)) => {
             let repos = mtch.values_of("compare-distros").unwrap().map(String::from).map(Repo::new).collect();
@@ -191,7 +191,7 @@ fn app() -> Result<()> {
             let content = ::std::fs::read_to_string(file_path)?;
             let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
 
-            frontend.compare_packages(pkgs, &backend, repos)?;
+            frontend.compare_packages(pkgs, &backend, repos)
         },
 
         (other, _mtch) => {
@@ -207,13 +207,12 @@ fn app() -> Result<()> {
                         .into_iter()
                         .filter(|package| repository_filter.filter(package.repo()))
                         .collect();
+
                     frontend.list_packages(packages)
                 })
                 .map_err(|_| format_err!("Unknown command: {}", other))
         }
     }
-
-    Ok(())
 }
 
 fn print_error(e: Error) {
