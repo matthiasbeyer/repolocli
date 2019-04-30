@@ -28,6 +28,7 @@ use std::io::Cursor;
 
 use failure::err_msg;
 use failure::Error;
+use failure::ResultExt;
 use failure::Fallible as Result;
 use clap::ArgMatches;
 use filters::filter::Filter;
@@ -91,7 +92,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
     }
 }
 
-fn main() -> Result<()> {
+fn app() -> Result<()> {
     let app = cli::build_cli().get_matches();
     initialize_logging(&app)?;
     let config : Configuration = {
@@ -110,7 +111,9 @@ fn main() -> Result<()> {
 
         let buffer = std::fs::read_to_string(path).map_err(Error::from)?;
         trace!("Config read into memory");
-        toml::de::from_str(&buffer).map_err(Error::from)
+        toml::de::from_str(&buffer)
+            .map_err(Error::from)
+            .context("Configuration file parsing")
     }?;
     trace!("Config deserialized");
 
@@ -209,4 +212,15 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn print_error(e: Error) {
+    error!("Error: {}", e);
+    e.iter_causes().for_each(|cause| {
+        error!("Caused by: {}", cause)
+    });
+}
+
+fn main() {
+    let _ = app().map_err(print_error);
 }
