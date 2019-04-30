@@ -1,38 +1,50 @@
 [package]
-name = "repolocli"
-version = "0.1.0"
-authors = ["Matthias Beyer <matthias.beyer@atos.net>"]
-edition = "2018"
+name            = "repolocli"
+version         = "0.1.0"
+authors         = ["Matthias Beyer <matthias.beyer@atos.net>"]
+edition         = "2018"
+description     = "CLI for repology.org"
+documentation   = "https://docs.rs/repolocli"
+homepage        = "https://github.com/matthiasbeyer/repolocli"
+repository      = "https://github.com/matthiasbeyer/repolocli"
+readme          = "./README.md"
+keywords        = ["cli", "repology"]
+categories      = ["command-line-interface", "command-line-utilities"]
+license         = "GPL-2.0-only"
+license-file    = "./LICENSE"
+
+[badges]
+maintenance = { status = "actively-developed" }
 
 [dependencies]
-librepology = { version = "0.1.0", path = "./librepology" }
-failure = "0.1"
-serde = "1"
-serde_derive = "1"
-serde_json = "1"
-toml = "0.5"
-toml-query = "0.8"
-url = "1.7"
-url_serde = "0.2"
-xdg = "2"
-log = "0.4"
-flexi_logger = "0.11"
-prettytable-rs = "0.8"
-filters = "0.3"
-boolinator = "2"
-itertools = "0.8"
+librepology     = { version = "0.1.0", path = "./librepology" }
+failure         = "0.1"
+serde           = "1"
+serde_derive    = "1"
+serde_json      = "1"
+toml            = "0.5"
+toml-query      = "0.8"
+url             = "1.7"
+url_serde       = "0.2"
+xdg             = "2"
+log             = "0.4"
+flexi_logger    = "0.11"
+prettytable-rs  = "0.8"
+filters         = "0.3"
+boolinator      = "2"
+itertools       = "0.8"
 
 [dependencies.clap]
-version = ">=2.33"
-default-features = false
-features = [ "suggestions", "color", "wrap_help" ]
+version             = ">=2.33"
+default-features    = false
+features            = [ "suggestions", "color", "wrap_help" ]
 
 [dependencies.csv]
 version  = "1"
 optional = true
 
 [features]
-default = ["compare_csv"]
+default     = ["compare_csv"]
 compare_csv = ["csv"]
 
 [profile.release]
@@ -45,3 +57,4 @@ codegen-units    = 16
 panic            = 'unwind'
 incremental      = false
 overflow-checks  = false
+
