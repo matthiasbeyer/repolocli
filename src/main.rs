@@ -1,7 +1,6 @@
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
-extern crate toml_query;
 extern crate url;
 extern crate xdg;
 extern crate flexi_logger;
