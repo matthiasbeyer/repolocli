@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -13,9 +11,6 @@ pub struct Configuration {
 
     #[serde(rename = "blacklist")]
     blacklist: Vec<String>,
-
-    #[serde(rename = "local_packages")]
-    local_packages: Option<Vec<Package>>,
 }
 
 impl Configuration {
@@ -31,30 +26,5 @@ impl Configuration {
         &self.blacklist
     }
 
-    // unused
-    //pub fn local_packages(&self) -> Option<&Vec<Package>> {
-    //    self.local_packages.as_ref()
-    //}
-
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Package {
-    #[serde(rename = "name")]
-    name: String,
-
-    #[serde(rename = "local_version")]
-    local_version: Version,
-}
-
-/// Not reusing the librepology type here because it might change
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Version(String);
-
-impl Deref for Version {
-    type Target = String;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
