@@ -11,7 +11,6 @@ readme          = "./README.md"
 keywords        = ["api", "repology"]
 categories      = ["data-structures", "api-bindings"]
 license         = "MPL-2.0"
-license-file    = "./LICENSE"
 
 [badges]
 maintenance = { status = "actively-developed" }
