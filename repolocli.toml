@@ -12,19 +12,3 @@ blacklist = [
     "Arch", # sorry Archers!
     "scientific_7x",
 ]
-
-
-# If you're a packager, and you have packages locally you care about,
-# repolocli can show you differences between your packages and "upstream" packages, if you want that.
-# For that, you have to list these packages here (in repology manner, so you have to use the
-# same names as repology!
-#
-# Yes, you have to manually keep that list up to date, sorry about that.
-
-[[local_packages]]
-name = "jq" # if you don't know jq, go check it out NOW!
-local_version = "1.5"
-
-[[local_packages]]
-name = "languagetool"
-local_version = "4.4.1"
