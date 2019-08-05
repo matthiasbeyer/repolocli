@@ -150,6 +150,8 @@ fn app() -> Result<()> {
     match app.subcommand() {
         ("project", Some(mtch)) => {
             trace!("Handling project");
+            trace!("sort-versions:   {}", mtch.is_present("sort-version"));
+            trace!("sort-repository: {}", mtch.is_present("sort-repo"));
 
             let name = if app.is_present("input_stdin") {
                 // Ugly, but works:
@@ -167,10 +169,12 @@ fn app() -> Result<()> {
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.is_present("sort-versions"){
+                if mtch.is_present("sort-version"){
+                    debug!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
                 } else if mtch.is_present("sort-repo") {
+                    debug!("Sorting by repository");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
                 } else {
