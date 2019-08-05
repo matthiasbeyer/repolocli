@@ -169,7 +169,7 @@ fn app() -> Result<()> {
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.is_present("sort-versions"){
+                if mtch.is_present("sort-version"){
                     debug!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
