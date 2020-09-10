@@ -55,7 +55,7 @@ impl Api for StdinWrapper {
 
 }
 
-fn read_to_string(input: &mut Read) -> Result<String> {
+fn read_to_string(input: &mut dyn Read) -> Result<String> {
     let mut buffer = String::new();
     let read = input.read_to_string(&mut buffer)?;
     trace!("Read {} bytes from stdin", read);
