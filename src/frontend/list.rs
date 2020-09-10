@@ -2,6 +2,7 @@ use std::io::Stdout;
 use std::io::Write;
 use std::ops::Deref;
 
+use librepology::v1::types::Name;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
@@ -48,7 +49,7 @@ impl Frontend for ListFrontend {
 
                 writeln!(outlock,
                          "{name:10} - {version:8} - {repo:15} - {status:5} - {www}",
-                         name = package.name().deref(),
+                         name = package.any_name().map(Name::deref).map(String::deref).unwrap_or_else(|| "<unknown>"),
                          version = package.version().deref(),
                          repo = package.repo().deref(),
                          status = status,
