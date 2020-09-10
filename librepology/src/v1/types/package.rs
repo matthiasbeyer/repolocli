@@ -5,8 +5,17 @@ pub struct Package {
     /// name of repository for this package
     repo: Repo,
 
-    /// name
-    name: Name,
+    /// package name(s) as used in repository - generic one and/or source package name and/or binary package name, whichever is applicable
+    name: Option<Name>,
+
+    /// package name(s) as used in repository - generic one and/or source package name and/or binary package name, whichever is applicable
+    srcname: Option<Name>,
+
+    /// package name(s) as used in repository - generic one and/or source package name and/or binary package name, whichever is applicable
+    binname: Option<Name>,
+
+    /// package name as shown to the user by Repology
+    visiblename: Option<Name>,
 
     /// version
     version: Version,
@@ -35,8 +44,29 @@ impl Package {
         &self.repo
     }
 
-    pub fn name(&self) -> &Name {
-        &self.name
+    pub fn name(&self) -> Option<&Name> {
+        self.name.as_ref()
+    }
+
+    pub fn srcname(&self) -> Option<&Name> {
+        self.srcname.as_ref()
+    }
+
+    pub fn binname(&self) -> Option<&Name> {
+        self.binname.as_ref()
+    }
+
+    pub fn visiblename(&self) -> Option<&Name> {
+        self.visiblename.as_ref()
+    }
+
+    /// Get name, srcname, binname or visiblename, whatever is set
+    /// (in this order)
+    pub fn any_name(&self) -> Option<&Name> {
+        self.name()
+            .or_else(|| self.srcname())
+            .or_else(|| self.binname())
+            .or_else(|| self.visiblename())
     }
 
     pub fn version(&self) -> &Version {
