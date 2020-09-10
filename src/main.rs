@@ -7,6 +7,7 @@ extern crate flexi_logger;
 extern crate filters;
 extern crate boolinator;
 extern crate itertools;
+extern crate semver;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
@@ -23,6 +24,7 @@ mod cli;
 mod compare;
 
 use std::path::PathBuf;
+use std::cmp::Ordering;
 
 #[cfg(feature = "compare_csv")]
 use std::io::Cursor;
@@ -35,11 +37,13 @@ use clap::ArgMatches;
 use filters::filter::Filter;
 use boolinator::Boolinator;
 use itertools::Itertools;
+use semver::Version as SemverVersion;
 
 use config::Configuration;
 use compare::ComparePackage;
 use librepology::v1::api::Api;
 use librepology::v1::types::Repo;
+use librepology::v1::types::Package;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
     let verbosity = app.occurrences_of("verbose");
@@ -85,7 +89,12 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
         "csv" => {
             let cursor = Cursor::new(s);
             let mut v : Vec<ComparePackage> = vec![];
-            for element in csv::Reader::from_reader(cursor).deserialize() {
+            let mut reader = csv::ReaderBuilder::new()
+                .has_headers(true)
+                .delimiter(b';')
+                .from_reader(cursor);
+
+            for element in reader.deserialize() {
                 v.push(element?);
             }
             Ok(v)
@@ -163,7 +172,7 @@ fn app() -> Result<()> {
                 mtch.value_of("project_name").unwrap()  // safe by clap
             };
 
-            let packages = {
+            let mut packages: Vec<Package> = {
                 let iter = backend
                     .project(&name)?
                     .into_iter()
@@ -181,6 +190,29 @@ fn app() -> Result<()> {
                     iter.collect()
                 }
             };
+
+            let packages = if mtch.is_present("latest") {
+                if mtch.is_present("semver") {
+                    let comp = |a: &Package, b: &Package| {
+                        let av = SemverVersion::parse(a.version());
+                        let bv = SemverVersion::parse(b.version());
+
+                        if let (Ok(av), Ok(bv)) = (av, bv) {
+                            av.partial_cmp(&bv).unwrap_or(Ordering::Equal)
+                        } else {
+                            Ordering::Equal
+                        }
+                    };
+
+                    packages.sort_by(comp);
+                } else {
+                    packages.sort_by(|a, b| a.version().partial_cmp(b.version()).unwrap_or(Ordering::Equal));
+                }
+                packages.pop().into_iter().collect::<Vec<_>>()
+            } else {
+                packages
+            };
+
             frontend.list_packages(packages)
         },
         ("problems", Some(mtch)) => {
