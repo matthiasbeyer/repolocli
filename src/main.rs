@@ -220,7 +220,7 @@ fn app() -> Result<()> {
 
         (other, _mtch) => {
             app.is_present("input_stdin")
-                .as_result((), Error::from(format_err!("Input not from stdin")))
+                .as_result((), format_err!("Input not from stdin"))
                 .and_then(|_| {
                     // Ugly, but works:
                     // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
