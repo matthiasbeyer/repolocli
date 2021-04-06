@@ -14,7 +14,7 @@ extern crate csv;
 
 #[macro_use] extern crate serde_derive;
 #[macro_use] extern crate log;
-#[macro_use] extern crate failure;
+#[macro_use] extern crate anyhow;
 #[macro_use] extern crate prettytable;
 
 mod config;
@@ -29,10 +29,9 @@ use std::cmp::Ordering;
 #[cfg(feature = "compare_csv")]
 use std::io::Cursor;
 
-use failure::err_msg;
-use failure::Error;
-use failure::ResultExt;
-use failure::Fallible as Result;
+use anyhow::Error;
+use anyhow::Context;
+use anyhow::Result;
 use clap::ArgMatches;
 use filters::filter::Filter;
 use boolinator::Boolinator;
@@ -118,7 +117,7 @@ fn app() -> Result<()> {
                 debug!("Searching for configuration in XDG");
                 xdg::BaseDirectories::new()?
                     .find_config_file("repolocli.toml")
-                    .ok_or_else(|| err_msg("Cannot find repolocli.toml"))
+                    .ok_or_else(|| anyhow!("Cannot find repolocli.toml"))
             }?;
 
         debug!("Parsing configuration from file: {}", path.display());
@@ -301,7 +300,7 @@ fn app() -> Result<()> {
 
 fn print_error(e: Error) {
     error!("Error: {}", e);
-    e.iter_causes().for_each(|cause| {
+    e.chain().for_each(|cause| {
         error!("Caused by: {}", cause)
     });
 }

@@ -2,11 +2,11 @@ use std::io::Stdout;
 use std::io::Write;
 use std::ops::Deref;
 
+use anyhow::Error;
+use anyhow::Result;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
-use failure::Fallible as Result;
-use failure::Error;
 
 use crate::frontend::Frontend;
 use crate::backend::Backend;
