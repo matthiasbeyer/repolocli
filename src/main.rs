@@ -128,20 +128,20 @@ fn app() -> Result<()> {
         let blacklist_filter = |repo: &Repo| -> bool {
             if config.blacklist().contains(repo) {
                 trace!("In Blacklist: {:?} -> false", repo);
-                return false;
+                false
             } else {
                 trace!("Not in Blacklist: {:?} -> true", repo);
-                return true;
+                true
             }
         };
 
         let whitelist_filter = |repo: &Repo| -> bool {
             if config.whitelist().contains(repo) {
                 trace!("In Whitelist: {:?} -> true", repo);
-                return true;
+                true
             } else {
                 trace!("Not in Whitelist: {:?} -> false", repo);
-                return false;
+                false
             }
         };
 
