@@ -1,5 +1,4 @@
-use failure::Fallible as Result;
-
+use crate::v1::error::Result;
 use crate::v1::types::Problem;
 use crate::v1::types::Package;
 

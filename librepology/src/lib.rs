@@ -1,4 +1,4 @@
-extern crate failure;
+extern crate thiserror;
 extern crate serde;
 extern crate serde_json;
 extern crate url;

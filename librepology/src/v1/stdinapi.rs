@@ -3,9 +3,8 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-use failure::Fallible as Result;
-use failure::Error;
-
+use crate::v1::error::Result;
+use crate::v1::error::RepologyError as Error;
 use crate::v1::types::Problem;
 use crate::v1::types::Package;
 use crate::v1::api::Api;
