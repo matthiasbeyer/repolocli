@@ -1,13 +1,13 @@
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
-extern crate toml_query;
 extern crate url;
 extern crate xdg;
 extern crate flexi_logger;
 extern crate filters;
 extern crate boolinator;
 extern crate itertools;
+extern crate semver;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
@@ -24,6 +24,7 @@ mod cli;
 mod compare;
 
 use std::path::PathBuf;
+use std::cmp::Ordering;
 
 #[cfg(feature = "compare_csv")]
 use std::io::Cursor;
@@ -36,11 +37,13 @@ use clap::ArgMatches;
 use filters::filter::Filter;
 use boolinator::Boolinator;
 use itertools::Itertools;
+use semver::Version as SemverVersion;
 
 use config::Configuration;
 use compare::ComparePackage;
 use librepology::v1::api::Api;
 use librepology::v1::types::Repo;
+use librepology::v1::types::Package;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
     let verbosity = app.occurrences_of("verbose");
@@ -86,7 +89,12 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
         "csv" => {
             let cursor = Cursor::new(s);
             let mut v : Vec<ComparePackage> = vec![];
-            for element in csv::Reader::from_reader(cursor).deserialize() {
+            let mut reader = csv::ReaderBuilder::new()
+                .has_headers(true)
+                .delimiter(b';')
+                .from_reader(cursor);
+
+            for element in reader.deserialize() {
                 v.push(element?);
             }
             Ok(v)
@@ -104,8 +112,10 @@ fn app() -> Result<()> {
             .value_of("config")
             .map(PathBuf::from)
             {
+                debug!("Found passed configuration file at {}", path.display());
                 Ok(path)
             } else {
+                debug!("Searching for configuration in XDG");
                 xdg::BaseDirectories::new()?
                     .find_config_file("repolocli.toml")
                     .ok_or_else(|| err_msg("Cannot find repolocli.toml"))
@@ -121,8 +131,13 @@ fn app() -> Result<()> {
     }?;
     trace!("Config deserialized");
 
+    debug!("Initializing Backend");
     let backend = crate::backend::new_backend(&app, &config)?;
+    debug!("Backend initialized");
+
+    debug!("Initializing Frontend");
     let frontend = crate::frontend::new_frontend(&app, &config)?;
+    debug!("Frontend initialized");
 
     let repository_filter = {
         let blacklist_filter = |repo: &Repo| -> bool {
@@ -147,10 +162,13 @@ fn app() -> Result<()> {
 
         blacklist_filter.or(whitelist_filter)
     };
+    debug!("Repository filter constructed successfully");
 
     match app.subcommand() {
         ("project", Some(mtch)) => {
-            trace!("Handling project");
+            debug!("Subcommand: 'project'");
+            trace!("sort-versions:   {}", mtch.is_present("sort-version"));
+            trace!("sort-repository: {}", mtch.is_present("sort-repo"));
 
             let name = if app.is_present("input_stdin") {
                 // Ugly, but works:
@@ -162,31 +180,64 @@ fn app() -> Result<()> {
                 mtch.value_of("project_name").unwrap()  // safe by clap
             };
 
-            let packages = {
+            let mut packages: Vec<Package> = {
+                debug!("Fetching packages");
                 let iter = backend
                     .project(&name)?
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.is_present("sort-versions"){
+                if mtch.is_present("sort-version"){
+                    trace!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
                 } else if mtch.is_present("sort-repo") {
+                    trace!("Sorting by repository");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
                 } else {
+                    trace!("Not sorting");
                     iter.collect()
                 }
             };
+
+            let packages = if mtch.is_present("latest") {
+                if mtch.is_present("semver") {
+                    let comp = |a: &Package, b: &Package| {
+                        let av = SemverVersion::parse(a.version());
+                        let bv = SemverVersion::parse(b.version());
+
+                        if let (Ok(av), Ok(bv)) = (av, bv) {
+                            av.partial_cmp(&bv).unwrap_or(Ordering::Equal)
+                        } else {
+                            Ordering::Equal
+                        }
+                    };
+
+                    packages.sort_by(comp);
+                } else {
+                    packages.sort_by(|a, b| a.version().partial_cmp(b.version()).unwrap_or(Ordering::Equal));
+                }
+                packages.pop().into_iter().collect::<Vec<_>>()
+            } else {
+                packages
+            };
+
+            debug!("Listing packages in frontend");
             frontend.list_packages(packages)
         },
+
         ("problems", Some(mtch)) => {
-            trace!("Handling problems");
+            debug!("Subcommand: 'problems'");
 
             let repo = mtch.value_of("repo");
             let maintainer = mtch.value_of("maintainer");
 
+            trace!("repo       = {:?}", repo);
+            trace!("maintainer = {:?}", maintainer);
+
             let problems = {
+                debug!("Finding problems...");
                 let iter = match (repo, maintainer) {
                     (Some(r), None) => backend.problems_for_repo(&r)?,
                     (None, Some(m)) => backend.problems_for_maintainer(&m)?,
@@ -197,28 +248,36 @@ fn app() -> Result<()> {
                 .filter(|problem| repository_filter.filter(problem.repo()));
 
                 if mtch.is_present("sort-maintainer") {
+                    trace!("Sorting problems by maintainer");
                     iter.sorted_by(|a, b| Ord::cmp(a.maintainer(), b.maintainer()))
                         .collect()
                 } else if mtch.is_present("sort-repo") {
+                    trace!("Sorting problems by repo");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
                 } else {
+                    trace!("Not sorting problems");
                     iter.collect()
                 }
             };
 
+            debug!("Listing problems in frontend");
             frontend.list_problems(problems)
         },
+
         ("compare", Some(mtch)) => {
+            debug!("Subcommand: 'compare'");
             let repos = mtch.values_of("compare-distros").unwrap().map(String::from).map(Repo::new).collect();
             let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
             let content = ::std::fs::read_to_string(file_path)?;
             let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
 
+            debug!("Comparing packages...");
             frontend.compare_packages(pkgs, &backend, repos)
         },
 
         (other, _mtch) => {
+            debug!("Subcommand: {}", other);
             app.is_present("input_stdin")
                 .as_result((), format_err!("Input not from stdin"))
                 .and_then(|_| {
@@ -232,6 +291,7 @@ fn app() -> Result<()> {
                         .filter(|package| repository_filter.filter(package.repo()))
                         .collect();
 
+                    debug!("Listing packages");
                     frontend.list_packages(packages)
                 })
                 .map_err(|_| format_err!("Unknown command: {}", other))

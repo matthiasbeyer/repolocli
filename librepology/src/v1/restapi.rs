@@ -42,16 +42,19 @@ impl Api for RestApi {
 
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
         let url = format!("{}api/v1/project/{}", self.repology, name.as_ref());
+        trace!("Request: {}", url);
         serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 
     fn problems_for_repo<R: AsRef<str>>(&self, repo: R) -> Result<Vec<Problem>> {
         let url = format!("{}api/v1/repository/{}/problems", self.repology, repo.as_ref());
+        trace!("Request: {}", url);
         serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 
     fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
         let url = format!("{}api/v1/maintainer/{}/problems", self.repology, maintainer.as_ref());
+        trace!("Request: {}", url);
         serde_json::from_str(&self.send_request(url)?).map_err(Error::from)
     }
 

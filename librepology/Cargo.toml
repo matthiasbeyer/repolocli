@@ -11,7 +11,6 @@ readme          = "./README.md"
 keywords        = ["api", "repology"]
 categories      = ["data-structures", "api-bindings"]
 license         = "MPL-2.0"
-license-file    = "./LICENSE"
 
 [badges]
 maintenance = { status = "actively-developed" }
@@ -25,12 +24,6 @@ url_serde       = "0.2"
 failure         = "0.1"
 log             = "0.4"
 derive_more     = "0.14"
+derive-new      = "0.5"
 curl            = "0.4"
 
-filters    = { version = "0.3", optional = true }
-derive-new = { version = "0.5", optional = true }
-
-[features]
-# By default, we include the filters functionality
-default        = [ "packagefilters" ]
-packagefilters = ["filters", "derive-new"]

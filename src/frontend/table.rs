@@ -1,6 +1,7 @@
 use std::io::Stdout;
 use std::ops::Deref;
 
+use librepology::v1::types::Name;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
@@ -64,7 +65,12 @@ impl Frontend for TableFrontend {
                 String::from("")
             }; // not optimal, but works for now
 
-            table.add_row(row![package.name(), package.version(), package.repo(), status, url]);
+            let name = package.any_name()
+                .map(Name::deref)
+                .map(String::clone)
+                .unwrap_or_else(|| String::from("<unknown>"));
+
+            table.add_row(row![name, package.version(), package.repo(), status, url]);
         });
         self.print(table)
     }

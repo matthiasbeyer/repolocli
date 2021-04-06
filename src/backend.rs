@@ -43,9 +43,10 @@ impl Api for Backend {
 
 pub fn new_backend(app: &ArgMatches, config: &Configuration) -> Result<Backend> {
     if app.is_present("input_stdin") {
+        trace!("Building new STDIN backend");
         Ok(Backend::Stdin(StdinWrapper::from(::std::io::stdin())))
     } else {
-        debug!("Constructing backend");
+        trace!("Building new remote backend");
         let url = config.repology_url().as_str().into();
         trace!("url = {}", url);
         Ok(Backend::RepologyOrg(RestApi::new(url)))
