@@ -1,0 +1,17 @@
+image: debian/buster
+sources:
+  - https://git.sr.ht/~matthiasbeyer/repolocli
+packages:
+  - libssl-dev
+  - openssl
+  - pkg-config
+tasks:
+  - install: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.42.0
+  - build: |
+      cd repolocli
+      PATH="$HOME/.cargo/bin:$PATH" cargo check --all --all-features --tests
+triggers:
+  - action: email
+    condition: always
+    to: mail@beyermatthias.de
+
