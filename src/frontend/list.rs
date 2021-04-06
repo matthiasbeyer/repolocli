@@ -9,9 +9,9 @@ use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
 
-use crate::frontend::Frontend;
 use crate::backend::Backend;
 use crate::compare::ComparePackage;
+use crate::frontend::Frontend;
 use librepology::v1::api::Api;
 
 pub struct ListFrontend(Stdout);
@@ -31,13 +31,13 @@ impl Frontend for ListFrontend {
 
         packages.iter().fold(Ok(()), |accu, package| {
             accu.and_then(|_| {
-                let status= if let Some(stat) = package.status() {
+                let status = if let Some(stat) = package.status() {
                     stat.deref().to_string()
                 } else {
                     String::from("No status")
                 }; // not optimal, but works for now.
 
-                let url= if let Some(url) = package.www() {
+                let url = if let Some(url) = package.www() {
                     if let Some(url) = url.first() {
                         url.deref().to_string()
                     } else {
@@ -47,13 +47,21 @@ impl Frontend for ListFrontend {
                     String::from("")
                 }; // not optimal, but works for now
 
-                writeln!(outlock,
-                         "{name:10} - {version:8} - {repo:15} - {status:5} - {www}",
-                         name = package.any_name().map(Name::deref).map(String::deref).unwrap_or_else(|| "<unknown>"),
-                         version = package.version().deref(),
-                         repo = package.repo().deref(),
-                         status = status,
-                         www = url).map(|_| ()).map_err(Error::from)
+                writeln!(
+                    outlock,
+                    "{name:10} - {version:8} - {repo:15} - {status:5} - {www}",
+                    name = package
+                        .any_name()
+                        .map(Name::deref)
+                        .map(String::deref)
+                        .unwrap_or_else(|| "<unknown>"),
+                    version = package.version().deref(),
+                    repo = package.repo().deref(),
+                    status = status,
+                    www = url
+                )
+                .map(|_| ())
+                .map_err(Error::from)
             })
         })
     }
@@ -63,20 +71,27 @@ impl Frontend for ListFrontend {
 
         problems.iter().fold(Ok(()), |accu, problem| {
             accu.and_then(|_| {
-                writeln!(outlock,
-                         "{repo:10} - {name:10} - {effname:10} - {maintainer:15} - {desc}",
-                         repo = problem.repo().deref(),
-                         name = problem.name().deref(),
-                         effname = problem.effname().deref(),
-                         maintainer = problem.maintainer().deref(),
-                         desc = problem.problem_description())
-                    .map(|_| ())
-                    .map_err(Error::from)
+                writeln!(
+                    outlock,
+                    "{repo:10} - {name:10} - {effname:10} - {maintainer:15} - {desc}",
+                    repo = problem.repo().deref(),
+                    name = problem.name().deref(),
+                    effname = problem.effname().deref(),
+                    maintainer = problem.maintainer().deref(),
+                    desc = problem.problem_description()
+                )
+                .map(|_| ())
+                .map_err(Error::from)
             })
         })
     }
 
-    fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
+    fn compare_packages(
+        &self,
+        packages: Vec<ComparePackage>,
+        backend: &Backend,
+        filter_repos: Vec<Repo>,
+    ) -> Result<()> {
         let mut output = self.0.lock();
 
         for package in packages {
@@ -99,4 +114,3 @@ impl Frontend for ListFrontend {
         Ok(())
     }
 }
-

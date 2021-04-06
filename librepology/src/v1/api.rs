@@ -1,6 +1,6 @@
 use crate::v1::error::Result;
-use crate::v1::types::Problem;
 use crate::v1::types::Package;
+use crate::v1::types::Problem;
 
 /// The high-level functionality of the repology API is represented in this trait
 ///
@@ -17,5 +17,3 @@ pub trait Api {
 
     fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>>;
 }
-
-

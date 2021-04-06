@@ -12,4 +12,3 @@ impl Deref for Www {
         &self.0
     }
 }
-

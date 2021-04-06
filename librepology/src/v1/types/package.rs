@@ -96,6 +96,4 @@ impl Package {
     pub fn downloads(&self) -> Option<&Vec<Download>> {
         self.downloads.as_ref()
     }
-
 }
-

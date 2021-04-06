@@ -11,4 +11,3 @@ impl Deref for Maintainer {
         &self.0
     }
 }
-

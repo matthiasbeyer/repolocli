@@ -41,4 +41,3 @@ pub enum Status {
     #[display(fmt = "ignored")]
     Ignored,
 }
-

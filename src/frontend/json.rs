@@ -8,9 +8,9 @@ use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
 
-use crate::frontend::Frontend;
 use crate::backend::Backend;
 use crate::compare::ComparePackage;
+use crate::frontend::Frontend;
 use librepology::v1::api::Api;
 
 pub struct JsonFrontend(Stdout);
@@ -38,14 +38,18 @@ impl JsonFrontend {
 impl Frontend for JsonFrontend {
     fn list_packages(&self, packages: Vec<Package>) -> Result<()> {
         self.write(serde_json::ser::to_string_pretty(&packages).map_err(Error::from)?)
-
     }
 
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()> {
         self.write(serde_json::ser::to_string_pretty(&problems).map_err(Error::from)?)
     }
 
-    fn compare_packages(&self, packages: Vec<ComparePackage>, backend: &Backend, filter_repos: Vec<Repo>) -> Result<()> {
+    fn compare_packages(
+        &self,
+        packages: Vec<ComparePackage>,
+        backend: &Backend,
+        filter_repos: Vec<Repo>,
+    ) -> Result<()> {
         #[derive(Serialize)]
         struct PackageComp {
             // not optimal, as we have to clone the inner variables from the package
@@ -64,7 +68,6 @@ impl Frontend for JsonFrontend {
         let mut output: Vec<PackageComp> = vec![];
 
         for package in packages.iter() {
-
             let comparisons = backend
                 .project(package.name().deref())?
                 .into_iter()
@@ -85,4 +88,3 @@ impl Frontend for JsonFrontend {
         self.write(serde_json::ser::to_string_pretty(&output)?)
     }
 }
-

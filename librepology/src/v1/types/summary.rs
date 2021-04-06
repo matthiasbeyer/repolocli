@@ -11,4 +11,3 @@ impl Deref for Summary {
         &self.0
     }
 }
-
