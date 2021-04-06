@@ -92,7 +92,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
             Ok(v)
         },
 
-        other => Err(format_err!("Unknown file extension: {}", other))?,
+        other => Err(format_err!("Unknown file extension: {}", other)),
     }
 }
 
