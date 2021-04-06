@@ -9,9 +9,6 @@ extern crate toml;
 extern crate url;
 extern crate xdg;
 
-#[cfg(feature = "compare_csv")]
-extern crate csv;
-
 #[macro_use]
 extern crate serde_derive;
 #[macro_use]
@@ -23,15 +20,11 @@ extern crate prettytable;
 
 mod backend;
 mod cli;
-mod compare;
 mod config;
 mod frontend;
 
 use std::cmp::Ordering;
 use std::path::PathBuf;
-
-#[cfg(feature = "compare_csv")]
-use std::io::Cursor;
 
 use anyhow::Context;
 use anyhow::Error;
@@ -42,7 +35,6 @@ use filters::filter::Filter;
 use itertools::Itertools;
 use semver::Version as SemverVersion;
 
-use compare::ComparePackage;
 use config::Configuration;
 use librepology::v1::api::Api;
 use librepology::v1::types::Package;
@@ -73,36 +65,6 @@ fn initialize_logging(app: &ArgMatches) -> Result<()> {
             debug!("Logger initialized!");
         })
         .map_err(Error::from)
-}
-
-fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePackage>> {
-    let pb = PathBuf::from(filepath);
-    let ext = pb
-        .extension()
-        .ok_or_else(|| format_err!("Couldn't get file extension: {}", filepath))?
-        .to_str()
-        .ok_or_else(|| format_err!("Not valid Unicode: {}", filepath))?;
-
-    match ext {
-        "json" => serde_json::from_str(&s).map_err(Error::from),
-
-        #[cfg(feature = "compare_csv")]
-        "csv" => {
-            let cursor = Cursor::new(s);
-            let mut v: Vec<ComparePackage> = vec![];
-            let mut reader = csv::ReaderBuilder::new()
-                .has_headers(true)
-                .delimiter(b';')
-                .from_reader(cursor);
-
-            for element in reader.deserialize() {
-                v.push(element?);
-            }
-            Ok(v)
-        }
-
-        other => Err(format_err!("Unknown file extension: {}", other)),
-    }
 }
 
 fn app() -> Result<()> {
@@ -265,22 +227,6 @@ fn app() -> Result<()> {
 
             debug!("Listing problems in frontend");
             frontend.list_problems(problems)
-        }
-
-        ("compare", Some(mtch)) => {
-            debug!("Subcommand: 'compare'");
-            let repos = mtch
-                .values_of("compare-distros")
-                .unwrap()
-                .map(String::from)
-                .map(Repo::new)
-                .collect();
-            let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
-            let content = ::std::fs::read_to_string(file_path)?;
-            let pkgs: Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
-
-            debug!("Comparing packages...");
-            frontend.compare_packages(pkgs, &backend, repos)
         }
 
         (other, _mtch) => {

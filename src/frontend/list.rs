@@ -7,12 +7,8 @@ use anyhow::Result;
 use librepology::v1::types::Name;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
-use librepology::v1::types::Repo;
 
-use crate::backend::Backend;
-use crate::compare::ComparePackage;
 use crate::frontend::Frontend;
-use librepology::v1::api::Api;
 
 pub struct ListFrontend(Stdout);
 
@@ -86,31 +82,4 @@ impl Frontend for ListFrontend {
         })
     }
 
-    fn compare_packages(
-        &self,
-        packages: Vec<ComparePackage>,
-        backend: &Backend,
-        filter_repos: Vec<Repo>,
-    ) -> Result<()> {
-        let mut output = self.0.lock();
-
-        for package in packages {
-            backend
-                .project(package.name().deref())?
-                .into_iter()
-                .filter(|p| filter_repos.contains(p.repo()))
-                .map(|upstream_package| {
-                    writeln!(output,
-                             "{our_package_name} - {our_package_version} - {up_repo_name} - {up_package_version}",
-                             our_package_name    = package.name().deref(),
-                             our_package_version = package.version().deref(),
-                             up_repo_name        = upstream_package.repo().deref(),
-                             up_package_version  = upstream_package.version().deref()
-                    ).map_err(Error::from)
-                })
-                .collect::<Result<Vec<()>>>()?;
-        }
-
-        Ok(())
-    }
 }

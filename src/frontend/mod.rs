@@ -3,8 +3,6 @@ use clap::ArgMatches;
 
 use librepology::v1::types::*;
 
-use crate::backend::Backend;
-use crate::compare::ComparePackage;
 use crate::config::Configuration;
 use crate::frontend::json::JsonFrontend;
 use crate::frontend::list::ListFrontend;
@@ -14,12 +12,6 @@ use crate::frontend::table::TableFrontend;
 pub trait Frontend {
     fn list_packages(&self, packages: Vec<Package>) -> Result<()>;
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()>;
-    fn compare_packages(
-        &self,
-        packages: Vec<ComparePackage>,
-        backend: &Backend,
-        filter_repos: Vec<Repo>,
-    ) -> Result<()>;
 }
 
 pub mod json;

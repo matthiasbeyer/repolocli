@@ -142,36 +142,6 @@ pub fn build_cli<'a>() -> App<'a, 'a> {
             )
         )
 
-        .subcommand(SubCommand::with_name("compare")
-            .about("Compare a list of packages to distro repositories")
-            .arg(Arg::with_name("compare-list")
-                .index(1)
-                .required(true)
-                .multiple(false)
-                .takes_value(true)
-                .value_name("FILE")
-                .help("Compare the data from this list to a list of distros out there. Supports JSON and CSV, based on file extension (.json / .csv)"))
-            .arg(Arg::with_name("compare-distros")
-                .index(2)
-                .required(true)
-                .multiple(true)
-                .takes_value(true)
-                .value_name("DIST")
-                .help("A list of repology distribution names to compare to"))
-
-            .after_help(r#"
-            Compare a list of packages to all supplied repology distributions.
-            The list of packages shall have the following format:
-
-            * CSV:
-                Header: name;version;comment
-
-            * JSON:
-                { "name": "...", "version": "...", "comment": "..." }
-
-            "#)
-        )
-
         .after_help(r#"
         repolocli can read data from stdin, if you want to postprocess repology.org data you already
         fetched from repology.org/api/v1 via curl (or some other method).

@@ -5,14 +5,10 @@ use anyhow::Result;
 use librepology::v1::types::Name;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
-use librepology::v1::types::Repo;
 use prettytable::format;
 use prettytable::Table;
 
-use crate::backend::Backend;
-use crate::compare::ComparePackage;
 use crate::frontend::Frontend;
-use librepology::v1::api::Api;
 
 /// A Frontend that formats the output in a nice ASCII-art table
 pub struct TableFrontend(Stdout);
@@ -95,27 +91,4 @@ impl Frontend for TableFrontend {
         self.print(table)
     }
 
-    fn compare_packages(
-        &self,
-        packages: Vec<ComparePackage>,
-        backend: &Backend,
-        filter_repos: Vec<Repo>,
-    ) -> Result<()> {
-        let mut table = self.mktable();
-        for package in packages {
-            backend
-                .project(package.name().deref())?
-                .into_iter()
-                .filter(|p| filter_repos.contains(p.repo()))
-                .for_each(|upstream_package| {
-                    table.add_row(row![
-                        package.name().clone(),
-                        package.version().clone(),
-                        upstream_package.repo().clone(),
-                        upstream_package.version().clone(),
-                    ]);
-                });
-        }
-        self.print(table)
-    }
 }
