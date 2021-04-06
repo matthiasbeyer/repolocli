@@ -11,4 +11,3 @@ impl Deref for Category {
         &self.0
     }
 }
-

@@ -2,10 +2,10 @@ use std::result::Result as RResult;
 
 use curl::easy::Easy2;
 
-use crate::v1::error::Result;
-use crate::v1::error::RepologyError as Error;
-use crate::v1::types::{Package, Problem};
 use crate::v1::api::Api;
+use crate::v1::error::RepologyError as Error;
+use crate::v1::error::Result;
+use crate::v1::types::{Package, Problem};
 
 /// Private helper type for collecting data from the curl library
 struct Collector(Vec<u8>);
@@ -39,27 +39,32 @@ impl RestApi {
 }
 
 impl Api for RestApi {
-
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
         let url = format!("{}api/v1/project/{}", self.repology, name.as_ref());
         trace!("Request: {}", url);
         let response = self.send_request(url)?;
-        serde_json::from_str(&response)
-            .map_err(Error::from)
+        serde_json::from_str(&response).map_err(Error::from)
     }
 
     fn problems_for_repo<R: AsRef<str>>(&self, repo: R) -> Result<Vec<Problem>> {
-        let url = format!("{}api/v1/repository/{}/problems", self.repology, repo.as_ref());
+        let url = format!(
+            "{}api/v1/repository/{}/problems",
+            self.repology,
+            repo.as_ref()
+        );
         trace!("Request: {}", url);
         let response = self.send_request(url)?;
         serde_json::from_str(&response).map_err(Error::from)
     }
 
     fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
-        let url = format!("{}api/v1/maintainer/{}/problems", self.repology, maintainer.as_ref());
+        let url = format!(
+            "{}api/v1/maintainer/{}/problems",
+            self.repology,
+            maintainer.as_ref()
+        );
         trace!("Request: {}", url);
         let response = self.send_request(url)?;
         serde_json::from_str(&response).map_err(Error::from)
     }
-
 }

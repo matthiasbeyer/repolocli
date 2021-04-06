@@ -11,4 +11,3 @@ impl Deref for License {
         &self.0
     }
 }
-

@@ -13,4 +13,3 @@ impl Deref for Download {
         &self.0
     }
 }
-

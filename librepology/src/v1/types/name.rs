@@ -11,4 +11,3 @@ impl Deref for Name {
         &self.0
     }
 }
-
