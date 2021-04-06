@@ -13,6 +13,10 @@ tasks:
   - test: |
       cd repolocli
       PATH="$HOME/.cargo/bin:$PATH" cargo test --all --all-features
+  - clippy: |
+      cd repolocli
+      PATH="$HOME/.cargo/bin:$PATH" rustup component add clippy
+      PATH="$HOME/.cargo/bin:$PATH" cargo clippy --all --all-targets --all-features -- -D warnings
 triggers:
   - action: email
     condition: always
