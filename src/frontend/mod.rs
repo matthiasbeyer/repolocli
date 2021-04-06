@@ -1,5 +1,5 @@
+use anyhow::Result;
 use clap::ArgMatches;
-use failure::Fallible as Result;
 
 use librepology::v1::types::*;
 

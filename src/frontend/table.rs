@@ -1,11 +1,11 @@
 use std::io::Stdout;
 use std::ops::Deref;
 
+use anyhow::Result;
 use librepology::v1::types::Name;
 use librepology::v1::types::Package;
 use librepology::v1::types::Problem;
 use librepology::v1::types::Repo;
-use failure::Fallible as Result;
 use prettytable::format;
 use prettytable::Table;
 
