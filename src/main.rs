@@ -1,48 +1,52 @@
+extern crate boolinator;
+extern crate filters;
+extern crate flexi_logger;
+extern crate itertools;
+extern crate semver;
 extern crate serde;
 extern crate serde_json;
 extern crate toml;
 extern crate url;
 extern crate xdg;
-extern crate flexi_logger;
-extern crate filters;
-extern crate boolinator;
-extern crate itertools;
-extern crate semver;
 
 #[cfg(feature = "compare_csv")]
 extern crate csv;
 
-#[macro_use] extern crate serde_derive;
-#[macro_use] extern crate log;
-#[macro_use] extern crate anyhow;
-#[macro_use] extern crate prettytable;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate anyhow;
+#[macro_use]
+extern crate prettytable;
 
-mod config;
 mod backend;
-mod frontend;
 mod cli;
 mod compare;
+mod config;
+mod frontend;
 
-use std::path::PathBuf;
 use std::cmp::Ordering;
+use std::path::PathBuf;
 
 #[cfg(feature = "compare_csv")]
 use std::io::Cursor;
 
-use anyhow::Error;
 use anyhow::Context;
+use anyhow::Error;
 use anyhow::Result;
+use boolinator::Boolinator;
 use clap::ArgMatches;
 use filters::filter::Filter;
-use boolinator::Boolinator;
 use itertools::Itertools;
 use semver::Version as SemverVersion;
 
-use config::Configuration;
 use compare::ComparePackage;
+use config::Configuration;
 use librepology::v1::api::Api;
-use librepology::v1::types::Repo;
 use librepology::v1::types::Package;
+use librepology::v1::types::Repo;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
     let verbosity = app.occurrences_of("verbose");
@@ -80,14 +84,12 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
         .ok_or_else(|| format_err!("Not valid Unicode: {}", filepath))?;
 
     match ext {
-        "json" => {
-            serde_json::from_str(&s).map_err(Error::from)
-        },
+        "json" => serde_json::from_str(&s).map_err(Error::from),
 
         #[cfg(feature = "compare_csv")]
         "csv" => {
             let cursor = Cursor::new(s);
-            let mut v : Vec<ComparePackage> = vec![];
+            let mut v: Vec<ComparePackage> = vec![];
             let mut reader = csv::ReaderBuilder::new()
                 .has_headers(true)
                 .delimiter(b';')
@@ -97,7 +99,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
                 v.push(element?);
             }
             Ok(v)
-        },
+        }
 
         other => Err(format_err!("Unknown file extension: {}", other)),
     }
@@ -106,19 +108,16 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
 fn app() -> Result<()> {
     let app = cli::build_cli().get_matches();
     initialize_logging(&app)?;
-    let config : Configuration = {
-        let path = if let Some(path) = app
-            .value_of("config")
-            .map(PathBuf::from)
-            {
-                debug!("Found passed configuration file at {}", path.display());
-                Ok(path)
-            } else {
-                debug!("Searching for configuration in XDG");
-                xdg::BaseDirectories::new()?
-                    .find_config_file("repolocli.toml")
-                    .ok_or_else(|| anyhow!("Cannot find repolocli.toml"))
-            }?;
+    let config: Configuration = {
+        let path = if let Some(path) = app.value_of("config").map(PathBuf::from) {
+            debug!("Found passed configuration file at {}", path.display());
+            Ok(path)
+        } else {
+            debug!("Searching for configuration in XDG");
+            xdg::BaseDirectories::new()?
+                .find_config_file("repolocli.toml")
+                .ok_or_else(|| anyhow!("Cannot find repolocli.toml"))
+        }?;
 
         debug!("Parsing configuration from file: {}", path.display());
 
@@ -176,7 +175,7 @@ fn app() -> Result<()> {
                 // works for now
                 ""
             } else {
-                mtch.value_of("project_name").unwrap()  // safe by clap
+                mtch.value_of("project_name").unwrap() // safe by clap
             };
 
             let mut packages: Vec<Package> = {
@@ -186,7 +185,7 @@ fn app() -> Result<()> {
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.is_present("sort-version"){
+                if mtch.is_present("sort-version") {
                     trace!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
@@ -215,7 +214,11 @@ fn app() -> Result<()> {
 
                     packages.sort_by(comp);
                 } else {
-                    packages.sort_by(|a, b| a.version().partial_cmp(b.version()).unwrap_or(Ordering::Equal));
+                    packages.sort_by(|a, b| {
+                        a.version()
+                            .partial_cmp(b.version())
+                            .unwrap_or(Ordering::Equal)
+                    });
                 }
                 packages.pop().into_iter().collect::<Vec<_>>()
             } else {
@@ -224,7 +227,7 @@ fn app() -> Result<()> {
 
             debug!("Listing packages in frontend");
             frontend.list_packages(packages)
-        },
+        }
 
         ("problems", Some(mtch)) => {
             debug!("Subcommand: 'problems'");
@@ -262,18 +265,23 @@ fn app() -> Result<()> {
 
             debug!("Listing problems in frontend");
             frontend.list_problems(problems)
-        },
+        }
 
         ("compare", Some(mtch)) => {
             debug!("Subcommand: 'compare'");
-            let repos = mtch.values_of("compare-distros").unwrap().map(String::from).map(Repo::new).collect();
+            let repos = mtch
+                .values_of("compare-distros")
+                .unwrap()
+                .map(String::from)
+                .map(Repo::new)
+                .collect();
             let file_path = mtch.value_of("compare-list").unwrap(); // safe by clap
             let content = ::std::fs::read_to_string(file_path)?;
-            let pkgs : Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
+            let pkgs: Vec<ComparePackage> = deserialize_package_list(content, file_path)?;
 
             debug!("Comparing packages...");
             frontend.compare_packages(pkgs, &backend, repos)
-        },
+        }
 
         (other, _mtch) => {
             debug!("Subcommand: {}", other);
@@ -300,9 +308,7 @@ fn app() -> Result<()> {
 
 fn print_error(e: Error) {
     error!("Error: {}", e);
-    e.chain().for_each(|cause| {
-        error!("Caused by: {}", cause)
-    });
+    e.chain().for_each(|cause| error!("Caused by: {}", cause));
 }
 
 fn main() {

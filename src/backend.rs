@@ -1,9 +1,9 @@
 use clap::ArgMatches;
 
 use librepology::v1::api::Api;
+use librepology::v1::buffer::BufferApi;
 use librepology::v1::error::Result;
 use librepology::v1::restapi::RestApi;
-use librepology::v1::buffer::BufferApi;
 use librepology::v1::types::*;
 
 use crate::config::Configuration;
@@ -44,7 +44,9 @@ impl Api for Backend {
 pub fn new_backend(app: &ArgMatches, config: &Configuration) -> anyhow::Result<Backend> {
     if app.is_present("input_stdin") {
         trace!("Building new STDIN backend");
-        BufferApi::read_from(std::io::stdin()).map(Backend::Buffer).map_err(anyhow::Error::from)
+        BufferApi::read_from(std::io::stdin())
+            .map(Backend::Buffer)
+            .map_err(anyhow::Error::from)
     } else {
         trace!("Building new remote backend");
         let url = config.repology_url().as_str().into();

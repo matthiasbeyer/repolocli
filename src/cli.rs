@@ -177,5 +177,4 @@ pub fn build_cli<'a>() -> App<'a, 'a> {
         fetched from repology.org/api/v1 via curl (or some other method).
         In this case, repolocli is only a easier-to-use 'jq' (if you don't know jq, look it up NOW!).
         "#)
-
 }

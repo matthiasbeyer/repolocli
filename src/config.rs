@@ -25,6 +25,4 @@ impl Configuration {
     pub fn blacklist(&self) -> &Vec<String> {
         &self.blacklist
     }
-
 }
-
