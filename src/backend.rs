@@ -3,7 +3,7 @@ use clap::ArgMatches;
 use librepology::v1::api::Api;
 use librepology::v1::error::Result;
 use librepology::v1::restapi::RestApi;
-use librepology::v1::stdinapi::StdinWrapper;
+use librepology::v1::buffer::BufferApi;
 use librepology::v1::types::*;
 
 use crate::config::Configuration;
@@ -11,7 +11,7 @@ use crate::config::Configuration;
 /// Helper type for cli implementation
 /// for being transparent in what backend we use
 pub enum Backend {
-    Stdin(StdinWrapper),
+    Buffer(BufferApi),
     RepologyOrg(RestApi),
 }
 
@@ -21,30 +21,30 @@ pub enum Backend {
 impl Api for Backend {
     fn project<N: AsRef<str>>(&self, name: N) -> Result<Vec<Package>> {
         match self {
-            Backend::Stdin(inner) => inner.project(name),
+            Backend::Buffer(inner) => inner.project(name),
             Backend::RepologyOrg(inner) => inner.project(name),
         }
     }
 
     fn problems_for_repo<R: AsRef<str>>(&self, repo: R) -> Result<Vec<Problem>> {
         match self {
-            Backend::Stdin(inner) => inner.problems_for_repo(repo),
+            Backend::Buffer(inner) => inner.problems_for_repo(repo),
             Backend::RepologyOrg(inner) => inner.problems_for_repo(repo),
         }
     }
 
     fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
         match self {
-            Backend::Stdin(inner) => inner.problems_for_maintainer(maintainer),
+            Backend::Buffer(inner) => inner.problems_for_maintainer(maintainer),
             Backend::RepologyOrg(inner) => inner.problems_for_maintainer(maintainer),
         }
     }
 }
 
-pub fn new_backend(app: &ArgMatches, config: &Configuration) -> Result<Backend> {
+pub fn new_backend(app: &ArgMatches, config: &Configuration) -> anyhow::Result<Backend> {
     if app.is_present("input_stdin") {
         trace!("Building new STDIN backend");
-        Ok(Backend::Stdin(StdinWrapper::from(::std::io::stdin())))
+        BufferApi::read_from(std::io::stdin()).map(Backend::Buffer).map_err(anyhow::Error::from)
     } else {
         trace!("Building new remote backend");
         let url = config.repology_url().as_str().into();
