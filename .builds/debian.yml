@@ -1,0 +1,24 @@
+image: debian/buster
+sources:
+  - https://git.sr.ht/~matthiasbeyer/repolocli
+packages:
+  - libssl-dev
+  - openssl
+  - pkg-config
+tasks:
+  - install: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.50.0
+  - build: |
+      cd repolocli
+      PATH="$HOME/.cargo/bin:$PATH" cargo build --all --all-features
+  - test: |
+      cd repolocli
+      PATH="$HOME/.cargo/bin:$PATH" cargo test --all --all-features
+  - clippy: |
+      cd repolocli
+      PATH="$HOME/.cargo/bin:$PATH" rustup component add clippy
+      PATH="$HOME/.cargo/bin:$PATH" cargo clippy --all --all-targets --all-features -- -D warnings
+triggers:
+  - action: email
+    condition: always
+    to: mail@beyermatthias.de
+

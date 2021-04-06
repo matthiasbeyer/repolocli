@@ -92,7 +92,7 @@ fn deserialize_package_list(s: String, filepath: &str) -> Result<Vec<ComparePack
             Ok(v)
         },
 
-        other => Err(format_err!("Unknown file extension: {}", other))?,
+        other => Err(format_err!("Unknown file extension: {}", other)),
     }
 }
 
@@ -128,20 +128,20 @@ fn app() -> Result<()> {
         let blacklist_filter = |repo: &Repo| -> bool {
             if config.blacklist().contains(repo) {
                 trace!("In Blacklist: {:?} -> false", repo);
-                return false;
+                false
             } else {
                 trace!("Not in Blacklist: {:?} -> true", repo);
-                return true;
+                true
             }
         };
 
         let whitelist_filter = |repo: &Repo| -> bool {
             if config.whitelist().contains(repo) {
                 trace!("In Whitelist: {:?} -> true", repo);
-                return true;
+                true
             } else {
                 trace!("Not in Whitelist: {:?} -> false", repo);
-                return false;
+                false
             }
         };
 
@@ -220,7 +220,7 @@ fn app() -> Result<()> {
 
         (other, _mtch) => {
             app.is_present("input_stdin")
-                .as_result((), Error::from(format_err!("Input not from stdin")))
+                .as_result((), format_err!("Input not from stdin"))
                 .and_then(|_| {
                     // Ugly, but works:
                     // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query

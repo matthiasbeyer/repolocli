@@ -2,6 +2,8 @@
 
 Library for accessing the public API of repology.org.
 
+MSRV: 1.42.0
+
 ## License
 
 The code in this directory (and all subdirectories) is _not_ licensed as

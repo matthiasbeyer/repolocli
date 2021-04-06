@@ -93,10 +93,10 @@ impl Frontend for TableFrontend {
                 .filter(|p| filter_repos.contains(p.repo()))
                 .for_each(|upstream_package| {
                     table.add_row(row![
-                       package.name().deref().clone(),
-                         package.version().deref().clone(),
-                         upstream_package.repo().deref().clone(),
-                         upstream_package.version().deref().clone(),
+                       package.name().clone(),
+                         package.version().clone(),
+                         upstream_package.repo().clone(),
+                         upstream_package.version().clone(),
                    ]);
                 });
         }

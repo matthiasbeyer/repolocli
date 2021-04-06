@@ -22,7 +22,7 @@ pub mod json;
 pub mod table;
 
 /// Helper function for building a new Frontend object based on the commandline parameters
-pub fn new_frontend(app: &ArgMatches, _config: &Configuration) -> Result<Box<Frontend>> {
+pub fn new_frontend(app: &ArgMatches, _config: &Configuration) -> Result<Box<dyn Frontend>> {
     match app.value_of("output") {
         None | Some("lines") => {
             debug!("No output specified, using default");
