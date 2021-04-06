@@ -1,5 +1,5 @@
 pub mod restapi;
-pub mod stdinapi;
+pub mod buffer;
 pub mod api;
 pub mod types;
 pub mod error;
