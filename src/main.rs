@@ -143,7 +143,7 @@ fn app() -> Result<()> {
             let mut packages: Vec<Package> = {
                 debug!("Fetching packages");
                 let iter = backend
-                    .project(&name)?
+                    .project(name)?
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
@@ -203,8 +203,8 @@ fn app() -> Result<()> {
             let problems = {
                 debug!("Finding problems...");
                 let iter = match (repo, maintainer) {
-                    (Some(r), None) => backend.problems_for_repo(&r)?,
-                    (None, Some(m)) => backend.problems_for_maintainer(&m)?,
+                    (Some(r), None) => backend.problems_for_repo(r)?,
+                    (None, Some(m)) => backend.problems_for_maintainer(m)?,
                     (None, None) => unimplemented!(),
                     (Some(_), Some(_)) => unimplemented!(),
                 }
