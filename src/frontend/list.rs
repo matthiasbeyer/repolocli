@@ -28,7 +28,7 @@ impl Frontend for ListFrontend {
         packages.iter().fold(Ok(()), |accu, package| {
             accu.and_then(|_| {
                 let status = if let Some(stat) = package.status() {
-                    stat.deref().to_string()
+                    stat.to_string()
                 } else {
                     String::from("No status")
                 }; // not optimal, but works for now.
