@@ -90,5 +90,4 @@ impl Frontend for TableFrontend {
         });
         self.print(table)
     }
-
 }

@@ -1,0 +1,35 @@
+name: "Check repolocli"
+
+on:
+  push:
+    branches: [master, staging, trying]
+  pull_request:
+    branches: [master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check-flake:
+    name: check-flake
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3.5.0
+      - uses: cachix/install-nix-action@v21
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix --extra-experimental-features "nix-command flakes" flake check
+
+  # We need some "accummulation" job here because bors fails (timeouts) to
+  # listen on matrix builds.
+  # Hence, we have some kind of dummy here that bors can listen on
+  ci-success:
+    name: CI
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    needs:
+      - check-flake
+    steps:
+      - name: CI succeeded
+        run: exit 0
+
