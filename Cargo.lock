@@ -675,7 +675,7 @@ dependencies = [
  "librepology",
  "log",
  "prettytable-rs",
- "semver 0.10.0",
+ "semver 1.0.27",
  "serde",
  "serde_derive",
  "serde_json",
@@ -751,12 +751,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "0.10.0"
+version = "1.0.27"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "394cec28fa623e00903caf7ba4fa6fb9a0e260280bb8cdbbba029611108a0190"
-dependencies = [
- "semver-parser",
-]
+checksum = "d767eb0aabc880b29956c35734170f26ed551a859dbd361d140cdbeca61ab1e2"
 
 [[package]]
 name = "semver-parser"

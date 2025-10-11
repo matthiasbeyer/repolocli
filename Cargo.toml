@@ -30,7 +30,7 @@ prettytable-rs  = "0.8"
 filters         = "0.3"
 boolinator      = "2"
 itertools       = "0.14"
-semver          = "0.10"
+semver          = "1"
 
 [dependencies.clap]
 version             = "4"
