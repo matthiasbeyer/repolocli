@@ -29,7 +29,7 @@ flexi_logger    = "0.11"
 prettytable-rs  = "0.8"
 filters         = "0.3"
 boolinator      = "2"
-itertools       = "0.8"
+itertools       = "0.14"
 semver          = "0.10"
 
 [dependencies.clap]
