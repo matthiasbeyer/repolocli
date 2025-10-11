@@ -12,7 +12,7 @@ categories      = ["command-line-interface", "command-line-utilities"]
 license         = "GPL-2.0-only"
 
 [badges]
-maintenance = { status = "actively-developed" }
+maintenance = { status = "passively-maintained" }
 
 [dependencies]
 librepology     = { version = "0.1.0", path = "./librepology" }
