@@ -114,6 +114,7 @@
           repolocli-tests = craneLib.cargoNextest {
             inherit cargoArtifacts src pname;
             buildInputs = repolocliBuildInputs;
+            cargoNextestExtraArgs = "--no-tests pass";
           };
         };
 
