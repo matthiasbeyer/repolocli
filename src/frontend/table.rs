@@ -68,7 +68,7 @@ impl Frontend for TableFrontend {
             let name = package
                 .any_name()
                 .map(Name::deref)
-                .map(String::clone)
+                .cloned()
                 .unwrap_or_else(|| String::from("<unknown>"));
 
             table.add_row(row![name, package.version(), package.repo(), status, url]);
