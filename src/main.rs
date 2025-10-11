@@ -83,7 +83,7 @@ fn app() -> Result<()> {
             Ok(path)
         } else {
             debug!("Searching for configuration in XDG");
-            xdg::BaseDirectories::new()?
+            xdg::BaseDirectories::new()
                 .find_config_file("repolocli.toml")
                 .ok_or_else(|| anyhow!("Cannot find repolocli.toml"))
         }?;
