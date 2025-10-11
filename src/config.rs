@@ -2,7 +2,6 @@ use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Configuration {
-    #[serde(with = "url_serde")]
     #[serde(rename = "repology_url")]
     repology_url: Url,
 

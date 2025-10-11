@@ -41,8 +41,15 @@ use librepology::v1::types::Package;
 use librepology::v1::types::Repo;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
-    let verbosity = app.occurrences_of("verbose");
-    let quietness = app.occurrences_of("quiet");
+    let verbosity = app
+        .get_occurrences::<String>("verbose")
+        .map(|o| o.count())
+        .unwrap_or(0);
+    let quietness = app
+        .get_occurrences::<String>("quiet")
+        .map(|o| o.count())
+        .unwrap_or(0);
+
     let sum = verbosity as i64 - quietness as i64;
     let mut level_filter = flexi_logger::LevelFilter::Info;
 
@@ -71,12 +78,12 @@ fn app() -> Result<()> {
     let app = cli::build_cli().get_matches();
     initialize_logging(&app)?;
     let config: Configuration = {
-        let path = if let Some(path) = app.value_of("config").map(PathBuf::from) {
+        let path = if let Some(path) = app.get_one::<String>("config").map(PathBuf::from) {
             debug!("Found passed configuration file at {}", path.display());
             Ok(path)
         } else {
             debug!("Searching for configuration in XDG");
-            xdg::BaseDirectories::new()?
+            xdg::BaseDirectories::new()
                 .find_config_file("repolocli.toml")
                 .ok_or_else(|| anyhow!("Cannot find repolocli.toml"))
         }?;
@@ -125,19 +132,19 @@ fn app() -> Result<()> {
     debug!("Repository filter constructed successfully");
 
     match app.subcommand() {
-        ("project", Some(mtch)) => {
+        Some(("project", mtch)) => {
             debug!("Subcommand: 'project'");
-            trace!("sort-versions:   {}", mtch.is_present("sort-version"));
-            trace!("sort-repository: {}", mtch.is_present("sort-repo"));
+            trace!("sort-versions:   {}", mtch.contains_id("sort-version"));
+            trace!("sort-repository: {}", mtch.contains_id("sort-repo"));
 
-            let name = if app.is_present("input_stdin") {
+            let name = if app.contains_id("input_stdin") {
                 // Ugly, but works:
                 // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
                 // _any_ "project", and get the stdin anyways. This is really not like it should be, but
                 // works for now
                 ""
             } else {
-                mtch.value_of("project_name").unwrap() // safe by clap
+                mtch.get_one::<String>("project_name").unwrap() // safe by clap
             };
 
             let mut packages: Vec<Package> = {
@@ -147,11 +154,11 @@ fn app() -> Result<()> {
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.is_present("sort-version") {
+                if mtch.contains_id("sort-version") {
                     trace!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
-                } else if mtch.is_present("sort-repo") {
+                } else if mtch.contains_id("sort-repo") {
                     trace!("Sorting by repository");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
@@ -161,8 +168,8 @@ fn app() -> Result<()> {
                 }
             };
 
-            let packages = if mtch.is_present("latest") {
-                if mtch.is_present("semver") {
+            let packages = if mtch.contains_id("latest") {
+                if mtch.contains_id("semver") {
                     let comp = |a: &Package, b: &Package| {
                         let av = SemverVersion::parse(a.version());
                         let bv = SemverVersion::parse(b.version());
@@ -191,11 +198,11 @@ fn app() -> Result<()> {
             frontend.list_packages(packages)
         }
 
-        ("problems", Some(mtch)) => {
+        Some(("problems", mtch)) => {
             debug!("Subcommand: 'problems'");
 
-            let repo = mtch.value_of("repo");
-            let maintainer = mtch.value_of("maintainer");
+            let repo = mtch.get_one::<String>("repo");
+            let maintainer = mtch.get_one::<String>("maintainer");
 
             trace!("repo       = {:?}", repo);
             trace!("maintainer = {:?}", maintainer);
@@ -211,11 +218,11 @@ fn app() -> Result<()> {
                 .into_iter()
                 .filter(|problem| repository_filter.filter(problem.repo()));
 
-                if mtch.is_present("sort-maintainer") {
+                if mtch.contains_id("sort-maintainer") {
                     trace!("Sorting problems by maintainer");
                     iter.sorted_by(|a, b| Ord::cmp(a.maintainer(), b.maintainer()))
                         .collect()
-                } else if mtch.is_present("sort-repo") {
+                } else if mtch.contains_id("sort-repo") {
                     trace!("Sorting problems by repo");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
@@ -229,9 +236,9 @@ fn app() -> Result<()> {
             frontend.list_problems(problems)
         }
 
-        (other, _mtch) => {
+        Some((other, _mtch)) => {
             debug!("Subcommand: {}", other);
-            app.is_present("input_stdin")
+            app.contains_id("input_stdin")
                 .as_result((), format_err!("Input not from stdin"))
                 .and_then(|_| {
                     // Ugly, but works:
@@ -248,6 +255,10 @@ fn app() -> Result<()> {
                     frontend.list_packages(packages)
                 })
                 .map_err(|_| format_err!("Unknown command: {}", other))
+        }
+        None => {
+            warn!("No command. Doing nothing");
+            Ok(())
         }
     }
 }
