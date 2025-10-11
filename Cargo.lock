@@ -336,9 +336,9 @@ dependencies = [
 
 [[package]]
 name = "filters"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "618e2eb21106737c30b3b733d8167aaaa4197fcc896486358502646d913e274b"
+checksum = "0ea2a3582a3bb84139554126bc608bf3e2a1ced8354dbdef38c41140ca10b3e3"
 
 [[package]]
 name = "find-msvc-tools"
