@@ -24,7 +24,7 @@ toml            = "0.5"
 url             = { version = "2.5", features = ["serde"] }
 xdg             = "2"
 log             = "0.4"
-flexi_logger    = "0.11"
+flexi_logger    = "0.31"
 prettytable-rs  = "0.8"
 filters         = "0.4"
 boolinator      = "2"
