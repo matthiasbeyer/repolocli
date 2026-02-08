@@ -42,7 +42,7 @@ impl Api for Backend {
 }
 
 pub fn new_backend(app: &ArgMatches, config: &Configuration) -> anyhow::Result<Backend> {
-    if app.contains_id("input_stdin") {
+    if app.get_flag("input_stdin") {
         trace!("Building new STDIN backend");
         BufferApi::read_from(std::io::stdin())
             .map(Backend::Buffer)

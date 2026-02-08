@@ -41,14 +41,8 @@ use librepology::v1::types::Package;
 use librepology::v1::types::Repo;
 
 fn initialize_logging(app: &ArgMatches) -> Result<()> {
-    let verbosity = app
-        .get_occurrences::<String>("verbose")
-        .map(|o| o.count())
-        .unwrap_or(0);
-    let quietness = app
-        .get_occurrences::<String>("quiet")
-        .map(|o| o.count())
-        .unwrap_or(0);
+    let verbosity = app.get_count("verbose") as usize;
+    let quietness = app.get_count("quiet") as usize;
 
     let sum = verbosity as i64 - quietness as i64;
     let mut level_filter = flexi_logger::LevelFilter::Info;
@@ -134,10 +128,10 @@ fn app() -> Result<()> {
     match app.subcommand() {
         Some(("project", mtch)) => {
             debug!("Subcommand: 'project'");
-            trace!("sort-versions:   {}", mtch.contains_id("sort-version"));
-            trace!("sort-repository: {}", mtch.contains_id("sort-repo"));
+            trace!("sort-versions:   {}", mtch.get_flag("sort-version"));
+            trace!("sort-repository: {}", mtch.get_flag("sort-repo"));
 
-            let name = if app.contains_id("input_stdin") {
+            let name = if app.get_flag("input_stdin") {
                 // Ugly, but works:
                 // If we have "--stdin" on CLI, we have a CLI/Stdin backend, which means that we can query
                 // _any_ "project", and get the stdin anyways. This is really not like it should be, but
@@ -154,11 +148,11 @@ fn app() -> Result<()> {
                     .into_iter()
                     .filter(|package| repository_filter.filter(package.repo()));
 
-                if mtch.contains_id("sort-version") {
+                if mtch.get_flag("sort-version") {
                     trace!("Sorting by version");
                     iter.sorted_by(|a, b| Ord::cmp(a.version(), b.version()))
                         .collect()
-                } else if mtch.contains_id("sort-repo") {
+                } else if mtch.get_flag("sort-repo") {
                     trace!("Sorting by repository");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
@@ -168,8 +162,8 @@ fn app() -> Result<()> {
                 }
             };
 
-            let packages = if mtch.contains_id("latest") {
-                if mtch.contains_id("semver") {
+            let packages = if mtch.get_flag("latest") {
+                if mtch.get_flag("semver") {
                     let comp = |a: &Package, b: &Package| {
                         let av = SemverVersion::parse(a.version());
                         let bv = SemverVersion::parse(b.version());
@@ -218,11 +212,11 @@ fn app() -> Result<()> {
                 .into_iter()
                 .filter(|problem| repository_filter.filter(problem.repo()));
 
-                if mtch.contains_id("sort-maintainer") {
+                if mtch.get_flag("sort-maintainer") {
                     trace!("Sorting problems by maintainer");
                     iter.sorted_by(|a, b| Ord::cmp(a.maintainer(), b.maintainer()))
                         .collect()
-                } else if mtch.contains_id("sort-repo") {
+                } else if mtch.get_flag("sort-repo") {
                     trace!("Sorting problems by repo");
                     iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
@@ -238,7 +232,7 @@ fn app() -> Result<()> {
 
         Some((other, _mtch)) => {
             debug!("Subcommand: {}", other);
-            app.contains_id("input_stdin")
+            app.get_flag("input_stdin")
                 .as_result((), format_err!("Input not from stdin"))
                 .and_then(|_| {
                     // Ugly, but works:
