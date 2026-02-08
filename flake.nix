@@ -1,7 +1,7 @@
 {
   description = "The repolocli framework";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-25.05";
+    nixpkgs.url = "nixpkgs/nixos-25.11";
     unstable-nixpkgs.url = "nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     crane.url = "github:ipetkov/crane";
