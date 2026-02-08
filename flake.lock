@@ -16,11 +16,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1759317730,
-        "narHash": "sha256-P9eY12U2AwNCqB2PVq/ZtTjPtbNSOrBJomCb5xuEJJM=",
+        "lastModified": 1769949738,
+        "narHash": "sha256-NtjmWxnMRRMR7WKlNo2Cn21s0lDDebYW6Ml5EeIcw6U=",
         "owner": "matthiasbeyer",
         "repo": "cargo-changelog",
-        "rev": "0758bf476275d57248f41f3b2d9903b8e9314e59",
+        "rev": "66681e1c64f3a02e93af7da30141b62a56eea2cc",
         "type": "github"
       },
       "original": {
