@@ -30,10 +30,6 @@
           overlays = [ (import inputs.rust-overlay) ];
         };
 
-        unstable = import inputs.unstable-nixpkgs {
-          inherit system;
-        };
-
         nightlyRustTarget = pkgs.rust-bin.selectLatestNightlyWith (
           toolchain:
           pkgs.rust-bin.fromRustupToolchain {
@@ -96,31 +92,8 @@
           buildInputs = repolocliBuildInputs;
         };
 
-        repolocli-docs = craneLib.cargoDoc {
-          inherit
-            cargoArtifacts
-            src
-            pname
-            version
-            ;
-          doInstallCargoArtifacts = true;
-          RUSTDOCFLAGS = "-D warnings"; # Error out if there is a warning
-        };
-
         rustfmt' = pkgs.writeShellScriptBin "rustfmt" ''
           exec "${nightlyRustTarget}/bin/rustfmt" "$@"
-        '';
-
-        customCargoMultiplexer = pkgs.writeShellScriptBin "cargo" ''
-          case "$1" in
-            +nightly)
-              shift
-              export PATH="${nightlyRustTarget}/bin/:''$PATH"
-              exec ${nightlyRustTarget}/bin/cargo "$@"
-              ;;
-            *)
-              exec ${rustTarget}/bin/cargo "$@"
-          esac
         '';
       in
       rec {
