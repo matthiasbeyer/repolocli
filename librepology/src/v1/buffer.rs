@@ -32,7 +32,7 @@ impl Api for BufferApi {
         serde_json::de::from_str(&self.buf).map_err(Error::from)
     }
 
-    fn problems_for_maintainer<M: AsRef<str>>(&self, _maintainer: M) -> Result<Vec<Problem>> {
+    fn problems_for_maintainer<M: AsRef<str>, R: AsRef<str>>(&self, _maintainer: M, _repo: R) -> Result<Vec<Problem>> {
         serde_json::de::from_str(&self.buf).map_err(Error::from)
     }
 }

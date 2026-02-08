@@ -15,5 +15,5 @@ pub trait Api {
 
     fn problems_for_repo<R: AsRef<str>>(&self, repo: R) -> Result<Vec<Problem>>;
 
-    fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>>;
+    fn problems_for_maintainer<M: AsRef<str>, R: AsRef<str>>(&self, maintainer: M, repo: R) -> Result<Vec<Problem>>;
 }

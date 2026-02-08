@@ -78,14 +78,13 @@ impl Frontend for TableFrontend {
 
     fn list_problems(&self, problems: Vec<Problem>) -> Result<()> {
         let mut table = self.mktable();
+        table.set_titles(row!["Project", "Maintainer", "Type"]);
         problems.iter().for_each(|problem| {
             trace!("Adding row for: {:?}", problem);
             table.add_row(row![
-                problem.repo(),
-                problem.name(),
-                problem.effname(),
+                problem.project_name(),
                 problem.maintainer(),
-                problem.problem_description()
+                problem.problem_type()
             ]);
         });
         self.print(table)
