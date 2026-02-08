@@ -1,4 +1,4 @@
-use clap::{Arg, ArgGroup, Command};
+use clap::{Arg, Command};
 
 pub fn build_cli() -> Command {
     Command::new("repolocli")
