@@ -20,8 +20,10 @@
     };
   };
 
-  outputs = inputs: inputs.flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ]
-    (system:
+  outputs =
+    inputs:
+    inputs.flake-utils.lib.eachSystem [ "x86_64-linux" "aarch64-linux" ] (
+      system:
       let
         pkgs = import inputs.nixpkgs {
           inherit system;
@@ -32,7 +34,13 @@
           inherit system;
         };
 
-        nightlyRustTarget = pkgs.rust-bin.selectLatestNightlyWith (toolchain: pkgs.rust-bin.fromRustupToolchain { channel = "nightly"; components = [ "rustfmt" ]; });
+        nightlyRustTarget = pkgs.rust-bin.selectLatestNightlyWith (
+          toolchain:
+          pkgs.rust-bin.fromRustupToolchain {
+            channel = "nightly";
+            components = [ "rustfmt" ];
+          }
+        );
         nightlyCraneLib = (inputs.crane.mkLib pkgs).overrideToolchain nightlyRustTarget;
         rustTarget = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
 
@@ -45,12 +53,19 @@
         src =
           let
             nixFilter = path: _type: !pkgs.lib.hasSuffix ".nix" path;
-            extraFiles = path: _type: !(builtins.any (n: pkgs.lib.hasSuffix n path) [ ".github" ".sh" ]);
-            filterPath = path: type: builtins.all (f: f path type) [
-              nixFilter
-              extraFiles
-              pkgs.lib.cleanSourceFilter
-            ];
+            extraFiles =
+              path: _type:
+              !(builtins.any (n: pkgs.lib.hasSuffix n path) [
+                ".github"
+                ".sh"
+              ]);
+            filterPath =
+              path: type:
+              builtins.all (f: f path type) [
+                nixFilter
+                extraFiles
+                pkgs.lib.cleanSourceFilter
+              ];
           in
           pkgs.lib.cleanSourceWith {
             src = ./.;
@@ -70,14 +85,24 @@
         };
 
         repolocli = craneLib.buildPackage {
-          inherit cargoArtifacts src pname version;
+          inherit
+            cargoArtifacts
+            src
+            pname
+            version
+            ;
           cargoExtraArgs = "--all-features -p repolocli";
 
           buildInputs = repolocliBuildInputs;
         };
 
         repolocli-docs = craneLib.cargoDoc {
-          inherit cargoArtifacts src pname version;
+          inherit
+            cargoArtifacts
+            src
+            pname
+            version
+            ;
           doInstallCargoArtifacts = true;
           RUSTDOCFLAGS = "-D warnings"; # Error out if there is a warning
         };
