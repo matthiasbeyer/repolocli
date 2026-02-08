@@ -33,10 +33,14 @@ impl Api for Backend {
         }
     }
 
-    fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
+    fn problems_for_maintainer<M: AsRef<str>, R: AsRef<str>>(
+        &self,
+        maintainer: M,
+        repo: R,
+    ) -> Result<Vec<Problem>> {
         match self {
-            Backend::Buffer(inner) => inner.problems_for_maintainer(maintainer),
-            Backend::RepologyOrg(inner) => inner.problems_for_maintainer(maintainer),
+            Backend::Buffer(inner) => inner.problems_for_maintainer(maintainer, repo),
+            Backend::RepologyOrg(inner) => inner.problems_for_maintainer(maintainer, repo),
         }
     }
 }

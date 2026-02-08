@@ -57,11 +57,12 @@ impl Api for RestApi {
         serde_json::from_str(&response).map_err(Error::from)
     }
 
-    fn problems_for_maintainer<M: AsRef<str>>(&self, maintainer: M) -> Result<Vec<Problem>> {
+    fn problems_for_maintainer<M: AsRef<str>, R: AsRef<str>>(&self, maintainer: M, repo: R) -> Result<Vec<Problem>> {
         let url = format!(
-            "{}api/v1/maintainer/{}/problems",
+            "{}api/v1/maintainer/{}/problems-for-repo/{}",
             self.repology,
-            maintainer.as_ref()
+            maintainer.as_ref(),
+            repo.as_ref()
         );
         trace!("Request: {}", url);
         let response = self.send_request(url)?;

@@ -66,12 +66,10 @@ impl Frontend for ListFrontend {
         problems.iter().try_fold((), |_, problem| {
             writeln!(
                 outlock,
-                "{repo:10} - {name:10} - {effname:10} - {maintainer:15} - {desc}",
-                repo = problem.repo().deref(),
-                name = problem.name().deref(),
-                effname = problem.effname().deref(),
+                "{name:30} - {maintainer:30} - {ptype}",
+                name = problem.project_name().deref(),
                 maintainer = problem.maintainer().deref(),
-                desc = problem.problem_description()
+                ptype = problem.problem_type()
             )
             .map(|_| ())
             .map_err(Error::from)

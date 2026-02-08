@@ -205,20 +205,14 @@ fn app() -> Result<()> {
                 debug!("Finding problems...");
                 let iter = match (repo, maintainer) {
                     (Some(r), None) => backend.problems_for_repo(r)?,
-                    (None, Some(m)) => backend.problems_for_maintainer(m)?,
-                    (None, None) => unimplemented!(),
-                    (Some(_), Some(_)) => unimplemented!(),
+                    (Some(r), Some(m)) => backend.problems_for_maintainer(m, r)?,
+                    (None, _) => unreachable!("repo is required by clap"),
                 }
-                .into_iter()
-                .filter(|problem| repository_filter.filter(problem.repo()));
+                .into_iter();
 
                 if mtch.get_flag("sort-maintainer") {
                     trace!("Sorting problems by maintainer");
                     iter.sorted_by(|a, b| Ord::cmp(a.maintainer(), b.maintainer()))
-                        .collect()
-                } else if mtch.get_flag("sort-repo") {
-                    trace!("Sorting problems by repo");
-                    iter.sorted_by(|a, b| Ord::cmp(a.repo(), b.repo()))
                         .collect()
                 } else {
                     trace!("Not sorting problems");

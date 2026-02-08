@@ -86,9 +86,9 @@ pub fn build_cli() -> Command {
                 .short('r')
                 .long("repo")
                 .alias("repository")
-                .required(false)
+                .required(true)
                 .num_args(1)
-                .help("The repository to get problems for")
+                .help("The repository to get problems for (required)")
             )
 
             .arg(Arg::new("maintainer")
@@ -97,12 +97,8 @@ pub fn build_cli() -> Command {
                 .alias("maint")
                 .required(false)
                 .num_args(1)
-                .help("The maintainer to get problems for")
+                .help("Filter problems by maintainer (uses maintainer-specific API)")
             )
-
-            .group(ArgGroup::new("problems-args")
-                .args(["repo", "maintainer"])
-                .required(true))
 
 
             .arg(Arg::new("sort-maintainer")
